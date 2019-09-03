@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://www.webmili.com" versionCode="0.6">
+	<application setting="false">
+		<name><![CDATA[抽奖助手]]></name>
+		<identifie><![CDATA[choujiang_page]]></identifie>
+		<version><![CDATA[7.0.5]]></version>
+		<type><![CDATA[business]]></type>
+		<ability><![CDATA[抽奖小程序]]></ability>
+		<description><![CDATA[内含自定义抽奖信息、参与抽奖等]]></description>
+		<author><![CDATA[米粒网]]></author>
+		<url><![CDATA[http://www.webmili.com/]]></url>
+	</application>
+	<platform>
+		<subscribes>
+		</subscribes>
+		<handles>
+			<message type="text" />
+			<message type="image" />
+			<message type="voice" />
+			<message type="video" />
+			<message type="shortvideo" />
+			<message type="location" />
+			<message type="link" />
+			<message type="subscribe" />
+			<message type="qr" />
+			<message type="trace" />
+			<message type="click" />
+			<message type="merchant_order" />
+			<message type="user_get_card" />
+			<message type="user_del_card" />
+			<message type="user_consume_card" />
+		</handles>
+		<rule embed="true" />
+		<card embed="false" />
+		<supports>
+			<item type="wxapp" />
+		</supports>
+	</platform>
+	<bindings>
+		<rule>
+			<entry title="应用入口" do="index" state="" direct="false" />
+		</rule>
+		<menu>
+			<entry title="基础信息" do="choujiang_base" state="" direct="false" />
+			<entry title="奖品管理" do="choujiang_goods" state="" direct="false" />
+			<entry title="用户管理" do="choujiang_users" state="" direct="false" />
+			<entry title="我要上首页" do="choujiang_brand" state="" direct="false" />
+			<entry title="推广码管理" do="choujiang_channel_code" state="" direct="false" />
+			<entry title="数据管理" do="choujiang_data" state="" direct="false" />
+			<entry title="常见问题" do="choujiang_problems" state="" direct="false" />
+			<entry title="小程序推荐" do="choujiang_xcx" state="" direct="false" />
+			<entry title="支付记录" do="choujiang_pay_record" state="" direct="false" />
+			<entry title="发起类别付费管理" do="choujiang_pay" state="" direct="false" />
+			<entry title="抽奖记录" do="choujiang_record" state="" direct="false" />
+			<entry title="提现管理" do="choujiang_withdrawal" state="" direct="false" />
+			<!--<entry title="骗审管理" do="choujiang_cheat" state="" direct="false" />-->
+			<!--<entry title="骗审底部导航" do="choujiang_cheat_nav" state="" direct="false" />-->
+			<entry title="物流管理" do="choujiang_express" state="" direct="false" />
+			<entry title="晒单管理" do="choujiang_share_order" state="" direct="false" />
+			<entry title="红包列表" do="choujiang_red_packets" state="" direct="false" />
+			<!--新入口-->
+			<entry title="心愿墙列表" do="wishingList" state="cj_admin_wishingWall" direct="false" />
+			<entry title="积分列表" do="scoreList" state="cj_admin_score" direct="false" />
+			<entry title="公告栏" do="noticeList" state="cj_admin_notice" direct="false" />
+		</menu>
+	</bindings>
+	<install><![CDATA[CREATE TABLE `ims_choujiang_base` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) NOT NULL,
+  `appid` varchar(255) DEFAULT NULL COMMENT '跳转小程序appid',
+  `appsecret` varchar(255) DEFAULT NULL COMMENT '密钥',
+  `template_id` varchar(255) DEFAULT NULL COMMENT '模板通知',
+  `appkey` varchar(255) DEFAULT NULL COMMENT '支付密钥',
+  `mch_id` varchar(255) DEFAULT NULL COMMENT '商户id',
+  `join_num` int(11) DEFAULT '0',
+  `smoke_num` int(11) DEFAULT NULL,
+  `winning_num` int(11) DEFAULT NULL,
+  `poundage` int(11) DEFAULT NULL,
+  `xcx_price` decimal(10,2) DEFAULT '0.00' COMMENT '小程序跳转 appid 付费价格',
+  `share_num` int(11) DEFAULT NULL,
+  `cheat_status` int(11) DEFAULT NULL,
+  `upfile` varchar(255) DEFAULT NULL,
+  `keypem` varchar(255) DEFAULT NULL,
+  `envelope_draw` int(11) DEFAULT '0' COMMENT '0未开启 1已开启',
+  `index_title` varchar(100) DEFAULT NULL COMMENT '首页标题',
+  `type` int(1) DEFAULT NULL COMMENT '储存类型',
+  `aliosskey` varchar(20) DEFAULT NULL COMMENT '阿里云OSS key id',
+  `aliosssecret` varchar(35) DEFAULT NULL COMMENT '阿里云OSS Key Secret',
+  `internal` int(1) DEFAULT NULL COMMENT '是否内外上传',
+  `bucket` varchar(50) DEFAULT NULL COMMENT '阿里云OSS Bucket',
+  `url` varchar(100) DEFAULT NULL COMMENT '阿里oss url前缀',
+  `location` varchar(100) DEFAULT NULL COMMENT '图片上传远程url',
+  `extensions_price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '一次扩展功能付费金额',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_cheat` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `icon` varchar(1000) DEFAULT NULL,
+  `content` varchar(6666) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_cheat_nav` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `icon` varchar(255) DEFAULT NULL,
+  `appid` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_earnings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `openid` varchar(100) DEFAULT NULL,
+  `money` decimal(10,2) DEFAULT NULL,
+  `create_time` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_exchange` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `goods_id` int(11) DEFAULT NULL,
+  `openid` varchar(100) DEFAULT NULL,
+  `status` int(11) DEFAULT '0' COMMENT '0-未领取  1-已领取',
+  `create_time` varchar(100) DEFAULT NULL,
+  `verification` varchar(255) DEFAULT NULL,
+  `orders` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_goods` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `goods_name` varchar(100) NOT NULL,
+  `goods_num` int(11) DEFAULT NULL,
+  `smoke_time` varchar(100) DEFAULT NULL COMMENT '自动开奖时间',
+  `smoke_num` int(11) DEFAULT NULL COMMENT '开奖人数',
+  `smoke_set` int(11) DEFAULT NULL COMMENT '开奖条件(0、按时间  1、按人数  2、手动)',
+  `goods_icon` text COMMENT '商品图片',
+  `goods_sponsorship` varchar(100) DEFAULT NULL COMMENT '奖品赞助商',
+  `status` int(11) DEFAULT '0' COMMENT '奖品状态(1、已结束   0、正在进行中)',
+  `goods_openid` varchar(100) DEFAULT NULL COMMENT '发起人',
+  `send_time` int(11) DEFAULT NULL COMMENT '开奖的时间',
+  `content` text COMMENT '奖品介绍',
+  `sponsorship_text` varchar(255) DEFAULT NULL COMMENT '赞助介绍',
+  `is_del` int(11) DEFAULT '1' COMMENT '1 未删除 -1 已删除',
+  `The_winning` int(11) DEFAULT '0',
+  `goods_winning` text CHARACTER SET utf8mb4,
+  `sponsorship_appid` varchar(200) DEFAULT NULL,
+  `openid_arr` text,
+  `audit_status` int(11) DEFAULT '0' COMMENT '审核状态 0-审核中 1通过 -1失败',
+  `mouth_command` varchar(255) DEFAULT NULL COMMENT '口令',
+  `join_conditions` int(11) DEFAULT '0' COMMENT '是否需要付费参与 0 没有  1 付费 2口令',
+  `price` decimal(10,2) DEFAULT '0.00' COMMENT '付费参与价格',
+  `red_envelope` decimal(10,2) DEFAULT NULL COMMENT '红包金额',
+  `card_info` text COMMENT '卡号',
+  `goods_status` int(11) DEFAULT '0' COMMENT '0 实物 1红包 2电子卡',
+  `goods_images` text COMMENT '奖品详情图',
+  `sponsorship_url` varchar(150) DEFAULT NULL COMMENT '跳转小程序路径',
+  `sponsorship_content` text COMMENT '赞助商介绍',
+  `is_zq` int(1) DEFAULT '0' COMMENT '是否付费增强版 1、付费版 0、普通版',
+  `is_pintuan` int(1) DEFAULT '0' COMMENT '是否开启拼团 1、开启拼团 0、无拼团',
+  `pintuan_maxnum` int(11) DEFAULT '0' COMMENT '拼团上限人数',
+  `draw_message` varchar(200) DEFAULT NULL COMMENT '抽奖说明',
+  `canyunum` int(11) unsigned DEFAULT NULL COMMENT '参与抽奖总人数',
+  `create_time` varchar(100) DEFAULT NULL COMMENT '奖品创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_pay_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `openid` varchar(255) DEFAULT NULL COMMENT '用户',
+  `vip_id` int(11) DEFAULT NULL COMMENT '购买类别id',
+  `create_time` varchar(100) DEFAULT NULL COMMENT '消费时间',
+  `total` varchar(50) DEFAULT NULL COMMENT '总额',
+  `num` int(11) DEFAULT NULL COMMENT '新增次数',
+  `nickname` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `status` int(11) DEFAULT NULL COMMENT '1-购买发起次数   2-发起红包抽奖  3-付费抽奖   4-提现 5-中奖收益  6-支付跳转小程序 7-购买扩展功能发起次数',
+  `poundage` varchar(50) DEFAULT '0' COMMENT '手续费',
+  `y_total` decimal(10,2) DEFAULT NULL COMMENT '原总价',
+  `goods_id` int(11) DEFAULT NULL COMMENT '奖品id',
+  `avatar` varchar(666) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_problems` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `answer` text,
+  `status` int(11) DEFAULT '0' COMMENT '1推送 0未推送',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `goods_id` int(11) DEFAULT NULL COMMENT '奖品',
+  `user_name` varchar(50) DEFAULT NULL COMMENT '收货人',
+  `status` int(11) NOT NULL COMMENT '中奖状态(0、未中   1、已中   -1、已中奖超过一天未填写收货信息视为放弃) ',
+  `create_time` varchar(100) DEFAULT NULL,
+  `goods_name` varchar(100) DEFAULT NULL,
+  `user_address` varchar(255) DEFAULT NULL COMMENT '收货地址',
+  `user_zip` varchar(100) DEFAULT NULL COMMENT '邮编',
+  `openid` varchar(100) DEFAULT NULL,
+  `nickname` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT '用户名',
+  `avatar` varchar(255) DEFAULT NULL COMMENT '用户头像',
+  `user_tel` varchar(100) DEFAULT NULL COMMENT '联系人电话',
+  `finish_time` varchar(100) DEFAULT NULL COMMENT '开奖时间',
+  `formid` varchar(100) DEFAULT NULL,
+  `card_num` varchar(100) DEFAULT NULL,
+  `card_password` varchar(100) DEFAULT NULL,
+  `pintuan_id` int(11) DEFAULT NULL COMMENT '拼团ID',
+  `del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0为未删除,1为删除',
+  PRIMARY KEY (`id`),
+  KEY `pintuan_id` (`pintuan_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_speak` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `openid` varchar(100) DEFAULT NULL,
+  `goods_id` int(11) DEFAULT NULL,
+  `content` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `openid` varchar(150) CHARACTER SET utf8 DEFAULT NULL,
+  `avatar` varchar(500) CHARACTER SET utf8 DEFAULT NULL,
+  `nickname` varchar(100) DEFAULT NULL,
+  `create_time` varchar(100) CHARACTER SET utf8 DEFAULT NULL,
+  `yu_num` int(11) DEFAULT '0',
+  `mf_num` int(11) DEFAULT NULL COMMENT '免费次数',
+  `smoke_num` int(11) DEFAULT NULL,
+  `smoke_share_num` int(11) DEFAULT NULL,
+  `winning_num` int(11) DEFAULT NULL,
+  `extensions_num` int(11) DEFAULT '0' COMMENT '扩展功能次数	',
+  `send_time` varchar(50) CHARACTER SET utf8 DEFAULT NULL,
+  `earnings` decimal(10,2) DEFAULT '0.00' COMMENT '收益',
+  `share_num` int(11) DEFAULT NULL,
+  `share_num_time` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `ims_choujiang_verification` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `verification` varchar(500) DEFAULT NULL COMMENT '二维码',
+  `goods_id` int(11) DEFAULT NULL,
+  `haibao` varchar(500) DEFAULT NULL,
+  `group_verification` varchar(500) DEFAULT NULL COMMENT '组团二维码',
+  `group_haibao` varchar(500) DEFAULT NULL COMMENT '组团海报',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_vip_num` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `title` varchar(50) DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `num` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_withdrawal` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `total` decimal(10,2) DEFAULT '0.00' COMMENT '原金额',
+  `status` int(11) DEFAULT '0' COMMENT '1-通过 -1拒绝',
+  `create_time` varchar(100) DEFAULT NULL,
+  `openid` varchar(100) DEFAULT NULL,
+  `poundage` decimal(10,2) DEFAULT '0.00' COMMENT '手续费',
+  `money` decimal(10,2) DEFAULT '0.00' COMMENT '实际提现金额',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `ims_choujiang_xcx` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `icon` text COMMENT '小程序图标',
+  `name` varchar(100) DEFAULT NULL COMMENT '小程序名字',
+  `title` varchar(100) DEFAULT NULL COMMENT '小程序标题',
+  `url` varchar(255) DEFAULT NULL COMMENT '小程序链接',
+  `appid` varchar(100) DEFAULT NULL,
+  `appsecret` varchar(150) DEFAULT NULL,
+  `status` int(11) DEFAULT '0' COMMENT '1推荐 0不推荐',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+]]></install>
+	<uninstall><![CDATA[DROP TABLE IF EXISTS `ims_choujiang_base`;
+DROP TABLE IF EXISTS `ims_choujiang_cheat`;
+DROP TABLE IF EXISTS `ims_choujiang_cheat_nav`;
+DROP TABLE IF EXISTS `ims_choujiang_earnings`;
+DROP TABLE IF EXISTS `ims_choujiang_exchange`;
+DROP TABLE IF EXISTS `ims_choujiang_goods`;
+DROP TABLE IF EXISTS `ims_choujiang_pay_record`;
+DROP TABLE IF EXISTS `ims_choujiang_problems`;
+DROP TABLE IF EXISTS `ims_choujiang_record`;
+DROP TABLE IF EXISTS `ims_choujiang_speak`;
+DROP TABLE IF EXISTS `ims_choujiang_user`;
+DROP TABLE IF EXISTS `ims_choujiang_verification`;
+DROP TABLE IF EXISTS `ims_choujiang_vip_num`;
+DROP TABLE IF EXISTS `ims_choujiang_withdrawal`;
+DROP TABLE IF EXISTS `ims_choujiang_xcx`;
+]]></uninstall>
+	<upgrade><![CDATA[upgrade.php]]></upgrade>
+</manifest>

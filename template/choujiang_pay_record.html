@@ -1,0 +1,75 @@
+{template 'common/header'}
+
+<form class="form-horizontal" action="" method="post" class="form1">
+    <div class="pull-right col-sm-6" style="margin-bottom:20px">
+        <div class="input-group" style="width:100%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入用户名进行搜索" style="height:34px">
+            <span class="input-group-btn">
+
+
+                 <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" class="btn btn-primary"> 搜索</span>
+            </span>
+        </div>
+    </div>
+    <table class="table we7-table table-hover article-list vertical-middle" style="margin-top:20px">
+        <tr>
+            <td style="width: 100px;">ID</td>
+            <td>用户</td>
+            <td>付费类别</td>
+            <td>总价</td>
+            <td>手续费</td>
+            <td>实付金额</td>
+            <td>付款时间</td>
+        </tr>
+        {loop $products $item}
+        <tr>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                <img src="{media $item['avatar']}" style="width:20px;height:20px" alt="">{$item['nickname']}
+            </td>
+            <td>
+                {$item['pay_type']}
+            </td>
+            <td>
+                ￥{$item['y_total']}
+            </td>
+            <td>
+                ￥{$item['poundage']}
+            </td>
+            <td>
+                ￥{$item['total']}
+            </td>
+            <td>
+                {$item['create_time']}
+            </td>
+           
+        </tr>
+        {/loop}
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+<script>
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.form-horizontal').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    $('.pagination li').each(function(e){
+        var href = $('.pagination li').eq(e).find('a').attr('href');
+        $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+        $('.pagination li').eq(e).find('a').attr('data-href', href);
+    });
+    $('.pagination li a').click(function(){
+        var href = $(this).attr('data-href');
+        $('.form-horizontal').prop('action', href);
+        $("button[type='submit']").click();
+    });
+    ///分页处理 - end
+</script>
+
+{template 'common/footer'}

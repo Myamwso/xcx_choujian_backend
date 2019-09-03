@@ -1,0 +1,94 @@
+<link rel="stylesheet" href="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.css">
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/vue.js"></script>
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.js"></script>
+{template 'common/header'}
+
+<div id="app" style="text-align:center;min-height: 600px">
+    <template>
+        <el-table
+                :data="tableData"
+                border
+                @sort-change="sort_change"
+                style="width: 100%"
+                :default-sort = "{prop: 'update_at', order: 'descending'}"
+        >
+            <el-table-column
+                    prop="update_at"
+                    label="日期"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']">
+            </el-table-column>
+            <el-table-column
+                    prop="real_name"
+                    label="姓名">
+            </el-table-column>
+            <el-table-column
+                    prop="tel"
+                    label="手机号码">
+            </el-table-column>
+            <el-table-column
+                    prop="qq"
+                    label="QQ号码">
+            </el-table-column>
+            <el-table-column
+                    prop="brand"
+                    label="品牌名称">
+            </el-table-column>
+        </el-table>
+    </template>
+    <div style="margin-top:15px;">
+        <el-pagination background @current-change="current_change" layout="prev, pager, next" :total="total" :page-size="pageNum"></el-pagination>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: "#app",
+        data: function () {
+            return {
+                tableData: [],
+                pageNum:15,
+                page:1,
+                total:0,
+                noNext:false,
+                sort: "desc"
+            }
+        },
+        methods: {
+            sort_change:function(prop){
+                if (prop.order == "descending" || prop.order==null) {
+                    this.sort = 'desc';
+                } else {
+                    this.sort = 'asc';
+                }
+
+                this.load_data();
+            },
+            current_change:function(currentPage){
+                this.page = currentPage;
+                this.load_data();
+            },
+            load_data:function(){
+                var self = this;
+
+                $.ajax({
+                    type : "GET",
+                    dataType : "json",
+                    contentType : "application/json",
+                    url : "{php echo $this->createWeburl('choujiang_brand', array('op'=>'content'));}"+"&page="+self.page+"&pageNum="+self.pageNum+"&sort="+self.sort,
+                    success : function(json) {
+                        self.tableData = json.data;
+                        self.total = json.total;
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+            }
+        },
+        created: function(){
+            this.load_data();
+        }
+    });
+</script>
+
+{template 'common/footer'}

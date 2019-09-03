@@ -1,0 +1,799 @@
+{template 'common/header'}
+{if $op == 'display'}
+<style type="text/css">
+    .mobannr {
+        border: 1px solid #e7e7eb;
+    }
+
+    .mb_title {
+        margin-bottom: 30px;
+    }
+
+    .mb_title .mb_kjrq {
+        color: #999;
+        font-size: 12px;
+    }
+
+    .mb_body p span:first-child {
+        display: inline-block;
+        color: #999;
+        margin-right: 20px;
+    }
+
+    .form-horizontal .form-group {
+        margin-left: 5px;
+    }
+</style>
+<form class="form-horizontal" onsubmit="return check(this)" action="" method="post"  name="uploadfile" enctype="multipart/form-data">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">基本信息设置<span style="color:#7E7E7E;font-size:13px;margin-left:10px">(谨慎设置，再次修改的时候，数量会覆盖原免费次数,默认 0 为不限制)</span>
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2" style="margin-right:45px">首页标题</label>
+                <div class="form-controls col-sm-5">
+                    <input type="text" name="set[index_title]" value="{$item['index_title']}"
+                           class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                           autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">首页标题</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2" style="margin-right:45px">小程序图片</label>
+                <div class="form-controls col-sm-5">
+                    <input type="hidden" name="img_url" value="{$img_url}">
+                    {php echo tpl_form_field_image('set[app_icon]', $item['app_icon'])}
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">小程序图片</div>
+            </div>
+
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2" style="margin-right:45px">appid</label>
+                <div class="form-controls col-sm-5">
+                    <input type="text" name="set[appid]" value="{$item['appid']}"
+                           class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                           autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">appid</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2" style="margin-right:45px">密钥</label>
+                <div class="form-controls col-sm-5">
+                    <input type="text" name="set[appsecret]" value="{$item['appsecret']}"
+                           class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                           autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">秘钥</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2" style="margin-right:45px">支付密钥</label>
+                <div class="form-controls col-sm-5">
+                    <input type="text" name="set[appkey]" value="{$item['appkey']}"
+                           class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                           autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">支付密钥</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2" style="margin-right:45px">商户id</label>
+                <div class="form-controls col-sm-5">
+                    <input type="text" name="set[mch_id]" value="{$item['mch_id']}"
+                           class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                           autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">商户id</div>
+            </div>
+
+
+            <div class="form-group">
+                <label for="lastname" class="col-sm-2 control-label" style="margin-right:45px">微信商户支付证书apiclient_cert.pem</label>
+                <div class="form-controls col-sm-5">
+                    <input type='file' name="upfile" value="{$item['upfile']}"
+                           class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                           autocomplete="off">{$item[upfile]}
+                    <input type="hidden" name="upfile1" value="{$item['upfile']}">
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="lastname" class="col-sm-2 control-label"
+                       style="margin-right:45px">微信商户支付证书apiclient_key.pem</label>
+                <div class="form-controls col-sm-5">
+                    <input type='file' name="keypem" value="{$item['keypem']}"
+                           class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                           autocomplete="off">{$item[keypem]}
+                    <input type="hidden" name="keypem1" value="{$item['keypem']}">
+
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">免费发起次数</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[join_num]" value="{$item['join_num']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">用户免费发起抽奖次数</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">免费抽奖次数</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[smoke_num]" value="{$item['smoke_num']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(默认 0 为不限制)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">每人每月最多可中奖次数</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[winning_num]" value="{$item['winning_num']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(默认 0 为不限制)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">每日分享可获得抽奖次数</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[share_num]" value="{$item['share_num']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(默认 0 为不限制)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">红包手续费(%)</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[poundage]" value="{$item['poundage']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(默认 0 为不收手续费。金额低于 1 元 不收取手续费)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">小程序跳转付费金额 元/次</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[xcx_price]" value="{$item['xcx_price']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(小程序添加跳转信息、需付费)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">扩展功能 元/次</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[extensions_price]" value="{$item['extensions_price']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(使用扩展增强功能、需付费)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">是否开启红包抽奖(奖品)</label>
+            <div class="form-controls col-sm-5">
+                <input type="radio" name="set[envelope_draw]" value="0" class="onclick" {if $item['envelope_draw'] == 0}
+                checked="checked" {/if}> 否
+                <input type="radio" name="set[envelope_draw]" value="1" class="onclick" {if $item['envelope_draw'] == 1}
+                checked="checked" {/if} style="margin-left:30px;"> 是
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">模板ID</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[template_id]" value="{$item['template_id']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">中奖消息推送</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">模板样式</label>
+            <div class="form-controls col-sm-5 mobannr" style="padding:10px;">
+                <div class="mb_title">
+                    <p>抽奖结果通知</p>
+                    <p class="mb_kjrq">2018年4月</p>
+                </div>
+                <div class="mb_body">
+                    <p>
+                        <span>活动商品</span>
+                        <span>XXXX</span>
+                    </p>
+                    <p>
+                        <span>注意事项</span>
+                        <span>XXXXXXXXXXXXXXX</span>
+                    </p>
+                </div>
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">开奖通知模板样式</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">每日推荐模板ID</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[day_template_id]" value="{$item['day_template_id']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">每日推荐消息推送</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">每日推荐模板样式</label>
+            <div class="form-controls col-sm-5 mobannr" style="padding:10px;">
+                <div class="mb_title">
+                    <p>礼品领取成功通知</p>
+                    <p class="mb_kjrq">2018年4月</p>
+                </div>
+                <div class="mb_body">
+                    <p>
+                        <span>礼品名称</span>
+                        <span>XXXX</span>
+                    </p>
+                    <p>
+                        <span>温馨提示</span>
+                        <span>XXXXXXXXXXXXXXX</span>
+                    </p>
+                </div>
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">推荐通知模板样式</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">晒单拒绝模板ID</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[refuse_template_id]" value="{$item['refuse_template_id']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">晒单拒绝消息推送</div>
+        </div>
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">晒单拒绝模板样式</label>
+            <div class="form-controls col-sm-5 mobannr" style="padding:10px;">
+                <div class="mb_title">
+                    <p>审核未通过提醒</p>
+                    <p class="mb_kjrq">2018年4月</p>
+                </div>
+                <div class="mb_body">
+                    <p>
+                        <span>审核内容</span>
+                        <span>XXXX</span>
+                    </p>
+                    <p>
+                        <span>未通过原因</span>
+                        <span>XXXXXXXXXXXXXXX</span>
+                    </p>
+                </div>
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">晒单拒绝模板样式</div>
+        </div>
+
+        <hr style="background-color:#FF0000;height:1px;">
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">存储类型</label>
+            <div class="form-controls col-sm-5">
+                <input type="radio" name="set[type]" value="0" class="onclick" {if $item['type'] == 0} checked="checked"
+                {/if}> 本地
+                <input type="radio" name="set[type]" value="1" class="onclick" {if $item['type'] == 1} checked="checked"
+                {/if} style="margin-left:30px;"> 阿里云OSS
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block"></div>
+        </div>
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">Access Key ID</label>
+            <div class="form-controls col-sm-5">
+                <input id="aliosskey" type="text" name="set[aliosskey]" value="{$item['aliosskey']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">Access Key ID是您访问阿里云API的密钥。</div>
+        </div>
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">Access Key Secret</label>
+            <div class="form-controls col-sm-5">
+                <input id="aliosssecret" type="text" name="set[aliosssecret]" value="{$item['aliosssecret']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">Access Key Secret是您访问阿里云API的密钥。(填写完Access Key ID 和 Access Key
+                Secret 后请选择bucket)
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">内网上传</label>
+            <div class="form-controls col-sm-5">
+                <input type="radio" name="set[internal]" value="0" class="onclick" {if $item['internal'] == 0}
+                checked="checked" {/if}> 否
+                <input type="radio" name="set[internal]" value="1" class="onclick" {if $item['internal'] == 1}
+                checked="checked" {/if} style="margin-left:30px;"> 是
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">
+                如果此站点使用的是阿里云ecs服务器，并且服务器与bucket在同一地区（如：同在华北一区），您可以选择通过内网上传的方式上传附件，以加快上传速度、节省带宽。
+            </div>
+        </div>
+        <div class="form-group" id="bucket">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">Bucket选择</label>
+            <div class="form-controls col-sm-5">
+                <select name="set[bucket]"></select>
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">完善Access Key ID和Access Key
+                Secret资料后可以选择存在的Bucket(请保证bucket为可公共读取的)，否则请手动输入。
+            </div>
+            <div id="url">
+                {if $item['url']}
+                <input type="hidden" name="set[url]" value="{$item['url']}">
+                {/if}
+                {if $item['location']}
+                <input type="hidden" name="set[location]" value="{$item['location']}">
+                {/if}
+            </div>
+        </div>
+
+        <hr style="background-color:#FF0000;height:1px;">
+
+        <div class="form-group" >
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">图片样式接口</label>
+            <div class="form-controls col-sm-5">
+                <span style="float: left;padding-top: 7px">x-oss-process=style/</span>
+                <input  style="float: left;width: 254px" type="text" id="img_api" name="set[img_api]" value="{$item['img_api']}"
+                        class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                        autocomplete="off"><br/>
+
+                <div style="width: 350px" class="form-controls col-sm-3 help-block">例子：sample.jpg?x-oss-process=style/规则</div>
+            </div>
+            <div class="col-sm-1"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">CDN加速</label>
+            <div class="form-controls col-sm-5">
+                <input type="radio" name="set[cdn_speed]" value="0" class="onclick" {if $item['cdn_speed'] == 0}
+                checked="checked" {/if}> 关闭
+                <input type="radio" name="set[cdn_speed]" value="1" class="onclick" {if $item['cdn_speed'] == 1}
+                checked="checked" {/if} style="margin-left:30px;"> 开启
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">
+
+            </div>
+        </div>
+        <div id="cdn" style="display: none">
+            <div class="form-group" >
+                <label for="" class="control-label col-sm-2" style="margin-right:45px">CDN_URL</label>
+                <div class="form-controls col-sm-5">
+                    <input  type="text" name="set[cdn_url]" value="{$item['cdn_url']}"
+                           class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                           autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+        </div>
+
+        <hr style="background-color:#FF0000;height:1px;">
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">拉新红包</label>
+            <div class="form-controls col-sm-5">
+                <input type="radio" name="set[wechat_status]" value="0" class="onclick" {if $item['wechat_status'] == 0}
+                checked="checked" {/if}> 否
+                <input type="radio" name="set[wechat_status]" value="1" class="onclick" {if $item['wechat_status'] == 1}
+                checked="checked" {/if} style="margin-left:30px;"> 是
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(是否开启拉新红包功能)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">红包版本</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[red_packets_version]" value="{$item['red_packets_version']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">新用户专享 元/次</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[wechat_price]" value="{$item['wechat_price']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(每拉一个新用户获取红包金额)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">拉新红包最低提取金额</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[wechat_min]" value="{$item['wechat_min']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(拉新红包最低提取金额)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">每人每日分享上限</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[share_limit]" value="{$item['share_limit']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">(每人每日最多分享数量)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">随机红包段 元/次</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" id="randPrice" name="set[wechat_rand_price]" value="{$item['wechat_rand_price']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div id="alertWarning" class="form-controls col-sm-3 help-block">(每拉一个新用户获取随机红包金额范围,例如：0.1-1.0)</div>
+        </div>
+
+        <div id="loopPrice">
+        {loop $item['loopPrice']['pirceList'] $key $val}
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">{php echo $item['loopPrice']['min']+$key*$item['loopPrice']['floorNum']}<{if $key == '0'}={/if} price <={if $item['loopPrice']['max'] < $item['loopPrice']['min']+(1+$key)*$item['loopPrice']['floorNum']}{$item['loopPrice']['max']}{else}{php echo $item['loopPrice']['min']+(1+$key)*$item['loopPrice']['floorNum']}{/if}</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[probability_num][{$key}]" value="{$val}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">%</div>
+        </div>
+        {/loop}
+        </div>
+
+        <hr style="background-color:#FF0000;height:1px;">
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">地图API AK</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[map_ak]" value="{$item['map_ak']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">地图api ak</div>
+        </div>
+
+        <hr style="background-color:#FF0000;height:1px;">
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">每周发布心愿数</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[wishing_week_release]" value="{$item['wishing_week_release']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">每天想要次数</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[wishing_daily_join]" value="{$item['wishing_daily_join']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">心愿商品最低价</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[wishing_min]" value="{$item['wishing_min']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">心愿商品最高价</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[wishing_max]" value="{$item['wishing_max']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">心愿达成比率</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[wishing_ratio]" value="{$item['wishing_ratio']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block">例如：一个用户发了心愿，80（价格：这个价格必须大于等于最低价，且小于等于最高价）心愿要达成到发布商品，赞点赞人数要大于等于80（价格）* 10（比率）</div>
+        </div>
+
+        <hr style="background-color:#FF0000;height:1px;">
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">分享参与想要得积分</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[score][share_likes]" value="{$item['score']['share_likes']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">发心愿得积分</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[score][release_wishing]" value="{$item['score']['release_wishing']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="control-label col-sm-2" style="margin-right:45px">我想要得积分</label>
+            <div class="form-controls col-sm-5">
+                <input type="text" name="set[score][i_likes]" value="{$item['score']['i_likes']}"
+                       class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder=""
+                       autocomplete="off">
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="form-controls col-sm-3 help-block"></div>
+        </div>
+
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input name="token" type="hidden" value="{$_W['token']}"/>
+            <input name="token" type="hidden" value="{$_W['token']}"/>
+            <input type="submit" class="btn btn-primary col-lg-1" name="submit" value="提交" style="margin-left: 38%;"/>
+            <!--<button type="button"  class="btn btn-primary col-lg-1" onclick = "check(this)" value="提交1" style="margin-left: 38%;">提交111</button>-->
+            <a class="btn btn-primary col-lg-2 test-oss" style="margin-left: 1%;">测试OSS配置</a>
+        </div>
+    </div>
+</form>
+{/if}
+<script>
+
+    var start_price = "{$item['loopPrice']['min']}-{$item['loopPrice']['max']}";
+    function check(t){
+        var values = $('#loopPrice input');
+        var temp = 0;
+        for(var i=0;i<values.length;i++){
+            if(values[i].value==''){
+                alert("概率不能为空");
+                return false;
+            }
+            // console.log(parseFloat(values[i].value).toFixed(2));
+            temp = temp+parseFloat(parseFloat(values[i].value).toFixed(2));
+        }
+        // console.log(temp.toFixed(2));
+        if(temp.toFixed(2)!=100){
+            alert("概率合计必须为100");
+            return false;
+        }
+        return true;
+    }
+
+    $('#randPrice').blur(function (event) {
+        // console.log(event)
+        var objRandPrice = $('#randPrice');
+        var randPrice = objRandPrice.val();
+        var PriceArr = randPrice.split("-");
+        if(PriceArr.length!=2 || PriceArr[0]<0.1 || PriceArr[1]<=PriceArr[0]){
+            if(PriceArr[0]<0.1){
+                $('#alertWarning').html("红包最低金额为0.1");
+                // alert("红包最低金额为0.1");
+            }else if(PriceArr[1]<=PriceArr[0]){
+                $('#alertWarning').html("红包金额必须是一个范围");
+            }else{
+                $('#alertWarning').html("红包金额格式错误");
+                // alert("红包金额格式错误");
+            }
+            // event.stopPropagation();
+            $('#alertWarning').css({"color":"#f00"});
+            objRandPrice.focus();
+            return false;
+        }
+        $('#alertWarning').html("(每拉一个新用户获取随机红包金额范围,例如：0.1-1.0)");
+        $('#alertWarning').css({"color":"#98999a"});
+        if(randPrice!=start_price){
+
+            var floorNum = {$item['loopPrice']['floorNum']};
+            var priceList = Math.ceil((PriceArr[1]-PriceArr[0])/floorNum);
+            var strHtml = "";
+            for(var i=0; i<priceList; i++){
+                strHtml += '<div class="form-group">';
+                strHtml += '<label for="" class="control-label col-sm-2" style="margin-right:45px">'+(parseFloat(PriceArr[0])+parseFloat(i*0.2)).toFixed(2)+'<';
+                if(i==0){
+                    strHtml += '=';
+                }
+
+                if((parseFloat(PriceArr[0])+parseFloat((i+1)*0.2)).toFixed(2)>PriceArr[1]){
+                    var maxPrice = parseFloat(PriceArr[1]).toFixed(2);
+                }else{
+                    var maxPrice = (parseFloat(PriceArr[0])+parseFloat((i+1)*0.2)).toFixed(2);
+                }
+
+                strHtml += ' price <='+maxPrice+'</label>';
+                strHtml += '<div class="form-controls col-sm-5">';
+                strHtml += '<input type="text" name="set[probability_num]['+i+']" value="" class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder="" autocomplete="off">';
+                strHtml += '</div>';
+                strHtml += '<div class="col-sm-1"></div>';
+                strHtml += '<div class="form-controls col-sm-3 help-block">%</div>';
+                strHtml += '</div>';
+            }
+            $('#loopPrice').html(strHtml);
+
+            start_price=randPrice;
+        }
+        // console.log(priceList)
+        // console.log(objRandPrice.val())
+    });
+
+
+    $(document).ready(function () {
+        var img = $("input[name='img_url']").val();
+        var cdn_speed = $("input[name='set[cdn_speed]']:checked").val();
+        if(cdn_speed==1){
+            $('#cdn').show();
+        }
+        $("input[name='set[app_icon]']").parent().next().find(".img-responsive").attr('src', img);
+        //cdn加速单选切换
+        $("input[type=radio][name='set[cdn_speed]']").change(function() {
+            var val = this.value;
+            if(val == 1){
+                $('#cdn').show();
+            }else{
+                $('#cdn').hide();
+            }
+        });
+
+    })
+    var alibucket = "{$item['bucket']}";
+    var buck = function () {
+        var key = $('#aliosskey').val();
+        var secret = $('#aliosssecret').val();
+        if (secret.indexOf('*') > 0) {
+            secret = "$list['secret']";
+        }
+        if (key == '' || secret == '') {
+            $('#bucket').hide();
+            return false;
+        }
+        $.post("{php echo url('system/attachment/buckets')}", {'key': key, 'secret': secret}, function (data) {
+            try {
+                var data = $.parseJSON(data);
+            } catch (error) {
+                layer.alert('Access Key ID 或 Access Key Secret 填写错误，请重新填写。', {icon: 2});
+                $('#bucket').hide();
+                $('select[name="set[bucket]"]').val('');
+                return false;
+            }
+
+            if (data.message.errno < 0) {
+                return false;
+            } else {
+                $('#bucket').show();
+                var bucket = $('select[name="set[bucket]"]');
+                bucket.empty();
+                var buckets = eval(data.message.message);
+                //$("#url").html('');
+                for (var i in buckets) {
+                    var url = 'http://' + buckets[i]['name'] + '.' + buckets[i]['location'] + '.aliyuncs.com/';
+                    //$("#url").append('<input type="hidden" name="set[url]" value="'+url+'">');
+
+                    var selected = alibucket == buckets[i]['name'] || alibucket == buckets[i]['name'] + '@@' + buckets[i]['location'] ? 'selected' : '';
+                    bucket.append('<option value="' + buckets[i]['name'] + '@@' + buckets[i]['location'] + '"' + selected + '>' + buckets[i]['loca_name'] + '</option>');
+                }
+            }
+        });
+    };
+    buck();
+    $('#aliosssecret').blur(function () {
+        buck();
+    });
+    $('#bucket').on("change", function () {
+        $("#url").html('');
+        var name = $('select[name="set[bucket]"]').val();
+        var urlPre = name.split("@@");
+        var url = 'https://' + urlPre[0] + '.' + urlPre[1] + '.aliyuncs.com/';
+        var urlLoca = 'http://' + urlPre[1] + '.aliyuncs.com/';
+        $("#url").append('<input type="hidden" name="set[url]" value="' + url + '">');
+        $("#url").append('<input type="hidden" name="set[location]" value="' + urlLoca + '">');
+    });
+
+
+    $('.test-oss').on("click", function () {
+        var bucket = $.trim($('select[name="set[bucket]"]').val());
+        if (bucket == '') {
+            bucket = $.trim($('input[name="set[bucket]"]').val());
+        }
+        var param = {
+            'key': $.trim($('#aliosskey').val()),
+            'secret': $.trim($('#aliosssecret').val()),
+            'url': $.trim($('input[name="set[url]"]').val()),
+            'bucket': bucket,
+            'internal': $('input[name="set[internal]"]:checked').val()
+        };
+        $.post("{php echo url('system/attachment/oss')}", param, function (data) {
+            var data = $.parseJSON(data);
+            if (data.message.errno == 0) {
+                $('.test-oss').click(function () {
+                    test_oss();
+                });
+                alert('配置成功');
+                return false;
+            }
+            if (data.message.errno < 0) {
+                alert(data.message.message);
+                return false;
+            }
+        });
+    });
+
+
+</script>
+{template 'common/footer'}

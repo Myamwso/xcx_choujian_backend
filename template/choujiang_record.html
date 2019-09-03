@@ -1,0 +1,258 @@
+{template 'common/header'}
+
+<style>
+    .cardbox{
+
+        position: relative;
+        /*background:red;*/
+    }
+    .dels{
+        position: absolute;
+        top:0px;
+        right:40%;
+    }
+
+    .toast{
+        width:100px;
+        height:40px;
+        background:transparent;
+        background:rgba(0,0,0,0.5);
+        border-radius:8px;
+        position: fixed;
+        margin:auto;left:0; right:0; top:0; bottom:0;
+        z-index: 999;
+        text-align: center;
+        line-height: 40px;
+        color: white;
+    }
+</style>
+
+{if $op == 'content'}
+
+<form class="form-horizontal" action="" method="post" class="form1">
+    <!--<div class="pull-left col-sm-6" style="padding-left: 300px" >-->
+        <!--<select name="status" class="form-control">-->
+            <!--<option value="0">&#45;&#45;请选择&#45;&#45;</option>-->
+            <!--<option value="1" {if $re_status==1} selected{/if}>已中奖</option>-->
+            <!--<option value="2" {if $re_status==2} selected{/if}>未中奖</option>-->
+            <!--<option value="3" {if $re_status==3} selected{/if}>已作废</option>-->
+            <!--<option value="4" {if $re_status==4} selected{/if}>未开奖</option>-->
+        <!--</select>-->
+    <!--</div>-->
+    <div class="col-sm-3" style="width:20%;float:left;padding:0px;margin:0 0 0 20%">
+        <select name="status" class="form-control">
+            <option value="0">--请选择--</option>
+            <option value="1" {if $re_status==1} selected{/if}>已中奖</option>
+            <option value="2" {if $re_status==2} selected{/if}>未中奖</option>
+            <option value="3" {if $re_status==3} selected{/if}>已作废</option>
+            <option value="4" {if $re_status==4} selected{/if}>未开奖</option>
+        </select>
+    </div>
+    <div class="col-sm-3" style="width:20%;float:left;padding:0px;margin:0 3% 0 3%">
+        <select name="field" id="field" class="form-control">
+            <option value="0">奖品名称</option>
+            <option value="1" {if $field==1} selected{/if}>用户名</option>
+        </select>
+    </div>
+    <div class="pull-right col-sm-4" style="margin-bottom:20px">
+
+        <div class="input-group" style="width:100%;">
+
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入奖品名称进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                   <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" class="btn btn-primary"> 搜索</span>
+            </span>
+
+        </div>
+    </div>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <td style="width: 100px;">ID</td>
+            <td>奖品名称</td>
+            <td>奖品缩略图</td>
+            <td>发布者手机号</td>
+            <td>用户</td>
+            <td>中奖状态</td>
+            <td>参与时间</td>
+            <td>开奖时间</td>
+            <td class="text-right">操作</td>
+        </tr>
+        {loop $products $item}
+        <tr>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                {$item['goods_name']}
+            </td>
+            <td style="width: 150px">
+                <img src="{media $item['goods_icon']}" width="100px" alt="">
+            </td>
+            <td>
+                {if $goodsUser[$item['goods_openid']]['tel'] > 0}
+                    {$goodsUser[$item['goods_openid']]['tel']}
+                {/if}
+            </td>
+            <td>
+                {$item['nickname']}
+            </td>
+            <td>
+                {$item['state']}
+            </td>
+            <td>
+                {$item['create_time']}
+            </td>
+            <td>
+                {if $item['state']=='未开奖'}未开奖{else}{$item['finish_time']}{/if}
+            </td>
+            <td>
+                {if $item['state']=='已中奖'}
+                <a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('choujiang_record', array('id' => $item['id'], 'op' =>'post'))}" >收货地址</a>
+                {else}
+                {/if}
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+{/if}
+
+{if $op == 'post'}
+<div class="pull-left">
+    <a href="javascript:window.history.back(-1);" class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">返回</a>
+</div>
+
+        <table class="table we7-table table-hover article-list vertical-middle">
+            <tr>
+                <td>收货人</td>
+                <td>{$item['user_name']}</td>
+            </tr>
+            <tr>
+                <td>收货地址</td>
+                <td>{$item['user_address']}</td>
+            </tr>
+            <tr>
+                <td>联系电话</td>
+                <td>{$item['user_tel']}</td>
+            </tr>
+            <tr>
+                <td>邮编地址</td>
+                <td>{$item['user_zip']}</td>
+            </tr>
+        </table>
+
+{if $good['audit_status']}
+<div class=" toast" id="loading" style="display: none"><span>提交中...</span></div>
+<form id="addForm" class="form-horizontal" action="{php echo $this->createWeburl('Choujiang_record', array('op'=>'send'));}" method="post">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">物流信息</h3>
+        </div>
+        <input type="hidden" name="id" value="{$id}">
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="" class="control-label col-sm-1">物流单号</label>
+                <div class="form-controls col-sm-5" style="margin-left: 75px;">
+                    <input type="text" name="express_no" id="express_no" value="{$item['express_no']}" onkeyup="value=value.replace(/[^0-9a-zA-z]|[_^]/ig,'')" maxlength="20" class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder="" autocomplete="off">
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-1">快递公司</label>
+                <div class="form-controls col-sm-5" style="margin-left: 75px;">
+                    <select name="express_company" id="express_company" class="form-control">
+                        <option value="0">--请选择--</option>
+                        {loop $expressList $v}
+                        <option value="{$v['express_name']}" {if $item['express_company']==$v['express_name']}selected{/if}>{$v['express_name']}</option>
+                        {/loop}
+                    </select>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input name="token" type="hidden" value="274451ae">
+            <span id="hideAddPost" class="btn btn-primary col-lg-1" style="left:40%;width: 200px;display: none">发货</span>
+            <span id="addPost" class="btn btn-primary col-lg-1" style="left:40%;width: 200px;">发货</span>
+        </div>
+    </div>
+</form>
+{else}
+<div class="panel-heading">
+    <h3 class="panel-title">该奖品未通过审核</h3>
+</div>
+
+{/if}
+
+{/if}
+<script>
+    //搜索框
+    $("select#field").change(function(){
+        var field = $(this).val();
+        if (field!=0) {
+            $("input[name='keyword']").attr('placeholder','请输入用户名进行搜索');
+        } else {
+            $("input[name='keyword']").attr('placeholder','请输入奖品名称进行搜索');
+        }
+    });
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.form-horizontal').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    $('.pagination li').each(function(e){
+        var href = $('.pagination li').eq(e).find('a').attr('href');
+        $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+        $('.pagination li').eq(e).find('a').attr('data-href', href);
+    });
+    $('.pagination li a').click(function(){
+        var href = $(this).attr('data-href');
+        $('.form-horizontal').prop('action', href);
+        $("button[type='submit']").click();
+    });
+    ///分页处理 - end
+
+    $("#addPost").click(function(){
+        var spanobj= $('#addPost');
+        var spanobjP=$('#hideAddPost');
+        if($("#express_company option:selected").val()==0 || ""==$("#express_no").val()){
+            alert("物流信息不能为空");
+            return false;
+        }
+        spanobj.hide();
+        spanobjP.show();
+
+        $("#loading").css('display','block');
+        $.post($('#addForm').attr('action'),$('#addForm').serialize(),function (res) {
+            var response = eval("(" + res + ")");
+            $("#loading").css('display','none')
+            if(response.type=='success'){
+                alert(response.message);
+                window.location.reload();
+            }else{
+                spanobj.show();
+                spanobjP.hide();
+                alert(response.message);
+                window.location.reload();
+            }
+        }).error(function(err) {
+            $("#loading").css('display','none');
+            spanobj.show();
+            spanobjP.hide();
+            if(err.responseText!=""){
+                alert(err.responseText);
+            }else{
+                alert("网络错误，请刷新后重试！");
+            }
+        });
+    });
+</script>
+
+    {template 'common/footer'}

@@ -1,0 +1,141 @@
+{template 'common/header'}
+{if $op == 'content'}
+<div class="pull-right">
+    <a href="{php echo $this->createWeburl('choujiang_pay', array('op'=>'post'));}"  class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">添加类别</a>
+</div>
+<style>
+    .actives{
+        background:#428BCA;
+        color:#FFF;
+    }
+</style>
+<form class="form-horizontal" action="" method="post" class="form1">
+    <div class="pull-right col-sm-6">
+        <div class="input-group" style="width:100%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入类别进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                <!--<button class="btn btn-primary" type="submit"> 搜索</button>-->
+                  <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" class="btn btn-primary"> 搜索</span>
+
+            </span>
+        </div>
+    </div>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <th style="width: 50px;"><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>
+            <td style="width: 100px;">ID</td>
+            <td>类别</td>
+            <td>金额</td>
+            <td>次数</td>
+            <td class="text-right">操作</td>
+        </tr>
+        {loop $products $item}
+        <tr>
+            <td><input type="checkbox" value="{$item['id']}" name="deleteall[]"></td>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                {$item['title']}
+            </td>
+            <td>
+                {$item['price']}
+            </td>
+            <td>
+                {$item['num']}
+            </td>
+            <td class="text-right">
+                <a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('choujiang_pay', array('id' => $item['id'], 'op' =>'post'))}" >编辑</a>
+                <a class="btn btn-default btn-sm" onclick="return confirm('此操作不可恢复，确认吗？'); return false;" href="{php echo $this->createWeburl('choujiang_pay', array('id' => $item['id'], 'op' => 'delete'))}">删除</a>
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <table class="table">
+        <tr>
+            <td>
+                <input class="btn btn-primary" type="submit" value="删除" name="submit" style="height: 30px;">
+            </td>
+        </tr>
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+<script type="text/javascript">
+    $('.form1').submit(function(){
+        if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+            return confirm('删除后不可恢复，您确定删除吗？');
+        }
+        return false;
+    });
+
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.form-horizontal').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    $('.pagination li').each(function(e){
+        var href = $('.pagination li').eq(e).find('a').attr('href');
+        $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+        $('.pagination li').eq(e).find('a').attr('data-href', href);
+    });
+    $('.pagination li a').click(function(){
+        var href = $(this).attr('data-href');
+        $('.form-horizontal').prop('action', href);
+        $("button[type='submit']").click();
+    });
+    ///分页处理 - end
+
+
+</script>
+{/if}
+
+<!-- 编辑新增 -->
+{if $op == 'post'}
+<form class="form-horizontal" action="" method="post">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">支付管理</h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="" class="control-label col-sm-1">类别名称</label>
+                <div class="form-controls col-sm-5" style="margin-left: 75px;">
+                    <input type="text" name="cj[title]" id="title" value="{$item['title']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">类别名称</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-1">次数</label>
+                <div class="form-controls col-sm-5" style="margin-left: 75px;">
+                    <input type="number" name="cj[num]" id="num" value="{$item['num']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">购买增加的最大次数</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-1">价格</label>
+                <div class="form-controls col-sm-5" style="margin-left: 75px;">
+                    <input type="text" name="cj[price]" id="price" value="{$item['price']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">价格</div>
+            </div>
+
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input name="token" type="hidden" value="{$_W['token']}" />
+            <input type="submit" class="btn btn-primary col-lg-1" name="submit" value="提交" style="margin-left: 45%;" />
+        </div>
+    </div>
+</form>
+
+{/if}
+{template 'common/footer'}
+
+

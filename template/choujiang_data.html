@@ -1,0 +1,292 @@
+{template 'common/header'}
+<input type="hidden" value="{{$userAmount}}" id="dataProvider">
+<style>
+    .cardbox{
+
+        position: relative;
+        /*background:red;*/
+    }
+    .dels{
+        position: absolute;
+        top:0px;
+        right:40%;
+    }
+
+    .toast{
+        width:100px;
+        height:40px;
+        background:transparent;
+        background:rgba(0,0,0,0.5);
+        border-radius:8px;
+        position: fixed;
+        margin:auto;left:0; right:0; top:0; bottom:0;
+        z-index: 999;
+        text-align: center;
+        line-height: 40px;
+        color: white;
+    }
+</style>
+<div class=" toast" id="loading" style="display: none"><span>提交中...</span></div>
+
+<ul class="nav nav-tabs">
+    <li {if $op == 'trends'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_data', array('op'=>'trends'));}">用户趋势</a></li>
+    <li {if $op == 'drainage' || $op =='detail'|| $op == 'post'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_data', array('op'=>'drainage'));}">引流统计</a></li>
+
+</ul>
+
+{if $op == 'drainage'}
+<form  action="{php echo $this->createWeburl('Choujiang_data', array('op'=>'drainage'));}" method="post">
+<div class="pull-left col-sm-9" style="padding:10px 0px 10px 0">
+    <div class="col-sm-3" style="float:left;padding-right:0px;padding-left: 0px;">
+        <select name="field" class="form-control">
+            <option value="0">--请选择--</option>
+            <option value="1" {if  $field==1 }selected{/if} >openid</option>
+            <option value="2" {if  $field==2 }selected{/if} >用户名</option>
+        </select>
+    </div>
+    <div class="col-sm-5" style="float:left;padding-right:20px">
+        <input type="text" class="input-sm form-control" name="keyword" value="{$keyword}" placeholder="" style="height:34px">
+    </div>
+    <div class="input-group" >
+            <span class="input-group-btn">
+                 <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" class="btn btn-primary"> 搜索</span>
+            </span>
+    </div>
+</div>
+</form>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+
+            <td>openid</td>
+            <td>用户(id)</td>
+            <td>{if $keyword}
+                引流人数
+                {elseif $sort=="descendingOrder"}
+                <a href="{php echo $this->createWeburl('Choujiang_data', array('op'=>'drainage','sort'=>'ascendingOrder','page'=>$pindex));}">引流人数▼</a>
+                {else}
+                <a href="{php echo $this->createWeburl('Choujiang_data', array('op'=>'drainage','sort'=>'descendingOrder','page'=>$pindex));}">引流人数▲</a>
+                {/if}
+            </td>
+
+        </tr>
+        {loop $products $item}
+        <tr>
+            <td>
+                {$item['openid']}
+            </td>
+            <td>
+                <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['user_id'], 'op' =>'detail'))}" style="color:#2b94ff"><img src="{$item['avatar']}" style="width: 40px;height: 40px">{$item['nickname']}({$item['user_id']})</a>
+                <!--<a href="{php echo $this->createWeburl('Choujiang_data', array('user_id' => $item['user_id'], 'op' =>'detail'))}" style="color:#2b94ff"><img src="{$item['avatar']}" style="width: 40px;height: 40px">{$item['nickname']}({$item['user_id']})</a>-->
+            </td>
+            <td>
+                {$item['amount']}
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+
+{/if}
+
+
+{if $op == 'detail'}
+<div class="pull-left">
+    <a href="javascript:window.history.back(-1);"  class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">返回</a>
+</div>
+<div class="pull-left col-sm-12" >
+    <h3>上级</h3>
+</div>
+
+<table class="table we7-table table-hover article-list vertical-middle">
+    <tr>
+        <td style="width: 60%">opneid</td>
+        <td style="width: 40%">用户(id)</td>
+    </tr>
+
+    <tr>
+        {if $top}
+        <td>
+            {$top['openid']}
+        </td>
+        <td>
+            <img src="{$top['avatar']}" style="width: 40px;height: 40px">{$top['nickname']}({$top['id']})
+        </td>
+        {/if}
+    </tr>
+</table>
+    <div class="pull-left col-sm-12" >
+    <h3>下级</h3>
+    </div>
+
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <td style="width: 60%">opneid</td>
+            <td style="width: 40%">用户(id)</td>
+        </tr>
+        {loop $products $item}
+        <tr>
+
+            <td>
+                {$item['openid']}
+            </td>
+            <td>
+                <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['id'], 'op' =>'detail'))}"><img src="{$item['avatar']}"  style="width: 40px;height: 40px">{$item['nickname']}({$item['user_id']})</a>
+            </td>
+
+        </tr>
+        {/loop}
+    </table>
+
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+
+{/if}
+
+{if $op == 'trends'}
+<ul class="nav nav-tabs" id="nav">
+    <li class="active"><a data-val="1">今天</a></li>
+    <li><a data-val="2">昨天</a></li>
+    <li><a data-val="3">最近七天</a></li>
+    <li><a data-val="4">最近30天</a></li>
+</ul>
+<div>
+    <link rel="stylesheet" href="../addons/choujiang_page/resource/css/style.css">
+    <div id="SmoothChart" class="Chart"></div>
+    <script src='../addons/choujiang_page/resource/js/amcharts.js?1'></script>
+    <script src='../addons/choujiang_page/resource/js/serial.js?1'></script>
+    <script  src="../addons/choujiang_page/resource/js/index.js?201808"></script>
+
+
+</div>
+{/if}
+
+{template 'common/footer'}
+
+<script>
+    var dataDraw;
+    $(function () {
+        getChartData('today');
+    })
+
+    //图表数据请求
+    $('#nav li').click(function(e){
+        var date;
+        var condition= e.target.innerText;
+        $(this).siblings('li').removeClass('active');
+        $(this).addClass('active');
+        if(condition=='今天'){
+            date= 'today';
+        }else if (condition == '昨天') {
+            date = 'yesterday';
+        } else if (condition == '最近七天') {
+            date = 'lastseven';
+        } else{
+            date = 'lastthirty';
+        }
+        getChartData(date);
+    });
+
+    function getChartData(date) {
+        var graphs=[
+            {
+                "balloonColor": "#5c389f",
+                "balloonText":"[[title]] : [[value]]",
+                "bullet": "square",
+                "fillAlphas": ".7",
+                "fillColorsField": "lineColor",
+                "gapPeriod": 0,
+                "id": "AmGraph-2",
+                "legendValueText": "[[value]]",
+                "lineAlpha": 0,
+                "lineColor": "#428bca",
+                "lineColorField": "lineColor",
+                "title": "访问人数",
+                "type": "smoothedLine",
+                "valueField": "visit"
+            },
+            {
+                "balloonColor": "#191919",
+                "balloonText": "[[title]] : [[value]]",
+                "bullet": "round",
+                "bulletAlpha": 0,//圆形样式
+                "bulletBorderAlpha": 1,
+                "bulletBorderColor": "#00d856",
+                "bulletSize": 6,
+                "color": "#1c95f3",
+                "fillAlphas": ".7",
+                "fillColorsField": "lineColor",
+                "fixedColumnWidth": 0,
+                "gapPeriod": 0,
+                "id": "AmGraph-1",
+                "legendValueText": "[[value]]",
+                "lineAlpha": 0,
+                "lineColor": "#00d856",
+                "lineColorField": "lineColor",
+                "title": "新用户数",
+                "type": "smoothedLine",
+                "valueField": "new"
+            }
+        ];
+
+        var valueAxis= new AmCharts.ValueAxis();
+        valueAxis.axisColor = "#4B4F5E";//轴的颜色
+        valueAxis.axisThickness = 1;//轴的宽度
+        valueAxis.axisAlpha = 0.9;
+        valueAxis.gridAlpha = 0.1;//轴的透明度，值介于0-1之间，0全透明
+        valueAxis.tickLength =0;//轴从下到上像左或右伸出来的延长线
+        // valueAxis.minimum = 0;//轴的最小值，如果不设置那么最小值根据数据动态变化
+        // valueAxis.maximum = 10;//轴的最大值，如果不设置那么最大值根据数据动态变化
+        valueAxis.logarithmic = false;//是否为对数函数分布，一般轴的刻度是均匀划分的，当该属性设置为true的时候，刻度分布呈对数形式分布
+        valueAxis.integersOnly = true;//是否只显示整数，如果为true轴的刻度只显示整数形式
+        // valueAxis.gridCount = 10;//最大刻度个数
+        // valueAxis.unit = "%";//单位
+//        valueAxis.labelsEnabled = true;//是否显示轴标签，默认值为true
+        valueAxis.inside = false;//轴的刻度值显示在表里面还是外面
+         valueAxis.position = "left";//轴的位置，默认在左侧
+        // valueAxis.stackType = "0%";
+        $.post("{php echo $this->createWeburl('getChartData')}",{date:date},function (res) {
+            console.log(res);
+            dataDraw=eval('('+res+')');
+            initConfig.graphs = graphs;
+            initConfig.dataProvider = dataDraw;
+            initConfig.chartScrollbar={
+                "enabled": true,
+                "autoGridCount": true,
+                "GridCount": 5,
+                "backgroundAlpha": 0,
+                "color": "#888888",
+                "graph": "g1",
+                "graphFillAlpha": 0,
+                "graphLineAlpha": 0,
+                "graphLineColor": "#c2c2c2",
+                "graphType": "smoothedLine",
+                "gridAlpha": 0.7,
+                "scrollbarHeight": 50,
+                "selectedBackgroundAlpha": 0.1,
+                "selectedBackgroundColor": "#888888",
+                "selectedGraphFillAlpha": 0,
+                "selectedGraphLineAlpha": 1,
+            };
+
+            var chart = AmCharts.makeChart("SmoothChart", initConfig);
+            chart.addValueAxis(valueAxis);
+            chart.addListener("rendered", zoomChart);
+            if (chart.zoomChart) {
+                chart.zoomChart();
+            }
+            function zoomChart() {
+                chart.zoomToIndexes(Math.round(chart.dataProvider.length * 0.0), Math.round(chart.dataProvider.length * 1.0));
+            }
+        })
+    }
+    $('#submitForm').click(function(){
+        $('.form-horizontal').prop('action', '');
+        $("button[type='submit']").click();
+    });
+</script>
+
+

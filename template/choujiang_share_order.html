@@ -1,0 +1,516 @@
+
+
+{template 'common/header'}
+<script>
+    var stroge=window.localStorage;
+    stroge.getItem('formData');
+
+</script>
+<style>
+    .cardbox{
+
+        position: relative;
+        /*background:red;*/
+    }
+   .dels{
+    position: absolute;
+    top:0px;
+    right:40%;
+   }
+
+    .toast{
+        width:100px;
+        height:40px;
+        background:transparent;
+        background:rgba(0,0,0,0.5);
+        border-radius:8px;
+        position: fixed;
+        margin:auto;left:0; right:0; top:0; bottom:0;
+        z-index: 999;
+        text-align: center;
+        line-height: 40px;
+        color: white;
+    }
+    .multi-img-details .multi-item {
+        height: auto;
+    }
+</style>
+<div class=" toast" id="loading" style="display: none"><span>提交中...</span></div>
+
+{if $op == 'content'}
+<div class="pull-left">
+    {if $sort=='desc'}
+    <a href="{php echo $this->createWeburl('choujiang_share_order', array('op'=>'content','sort'=>'asc'));}"  class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">升序</a>
+    {elseif $sort=='asc'}
+    <a href="{php echo $this->createWeburl('choujiang_share_order', array('op'=>'content','sort'=>'desc'));}"  class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">降序</a>
+    {else}
+    <a href="{php echo $this->createWeburl('choujiang_share_order', array('op'=>'content','sort'=>'asc'));}"  class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">升序</a>
+    {/if}
+</div>
+<div class="pull-right">
+    <a href="{php echo $this->createWeburl('choujiang_share_order', array('op'=>'post'));}"  class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">添加晒单</a>
+</div>
+<form class="form-horizontal search" action="" method="post" class="form1">
+    <div class="pull-right col-sm-8">
+        <input type="hidden" id="status" value="{$condition}" />
+        <div class="col-sm-3" style="width:25%;float:left;padding:0px;margin:0 0 0 3%">
+             <select name="openid" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="1" {if $openid==1} selected{/if}>openid</option>
+            </select>
+        </div>
+        <div class="col-sm-3" style="width:25%;float:left;padding:0px;margin:0 3% 0 3%">
+            <select name="status" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="-2" {if $status==-2} selected{/if}>待发货</option>
+                <option value="3" {if $status==3} selected{/if}>待晒单</option>
+                <option value="1" {if $status==1} selected{/if}>待审核</option>
+                <option value="2" {if $status==2} selected{/if}>通过</option>
+                <option value="-1" {if $status==-1} selected{/if}>拒绝</option>
+
+            </select>
+        </div>
+        <div class="input-group" style="width:40%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入奖品名称进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" data-val="" class="btn btn-primary" > 搜索</span>
+            </span>
+        </div>
+    </div>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>
+            <td style="width: 60px;">ID</td>
+            <td style="width: 60px;">序号</td>
+            <td>奖品名称</td>
+            <td width="100px" >奖品缩略图</td>
+            <td style="width: 200px">评价内容</td>
+            <td style="width: 100px">评价图片</td>
+            <td style="width: 100px">晒单用户</td>
+            <td>状态</td>
+            <td class="text-right">操作</td>
+        </tr>
+        {loop $shareOrderList $item}
+        <tr>
+            <td><input type="checkbox" value="{$item['id']}" name="deleteall[]"></td>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                {$item['sort']}
+            </td>
+            <td>
+                {$item['goods_name']}
+            </td>
+            <td >
+                <img  src="{$item['goods_icon']}" width="130px" height="70px"  alt="">
+            </td>
+            <td>
+                {$item['content']}
+            </td>
+            <td>
+                {loop $item['img'] $v}
+                <img style="float:left;width: 40px;height: 40px" src="{$v}">
+                {/loop}
+            </td>
+            <td>
+
+                <img style="width: 40px;height: 40px"  src="{$item['avatar']}">{$item['nickname']}
+            </td>
+
+
+            <td>
+                {if $item['status']==0}
+                   待晒单
+                {elseif $item['status']==1}
+                    待审核
+                {elseif $item['status']==2}
+                    通过
+                {elseif $item['status']==-1}
+                <span style="color: red">拒绝</span>
+                {else}
+                待发货
+                {/if}
+            </td>
+            <td class="text-right">
+                {if $item['address']}
+                <a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('choujiang_share_order', array('id' => $item['id'], 'op' =>'post'))}" >编辑</a>
+                <a class="btn btn-default btn-sm" onclick="return confirm('此操作不可恢复，确认吗？'); return false;" href="{php echo $this->createWeburl('choujiang_share_order', array('id' => $item['id'], 'op' => 'delete'))}">删除</a>
+                {else}
+                未填写收货地址
+                {/if}
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <table class="table">
+        <tr>
+            <td>
+                <input class="btn btn-primary" type="submit" value="删除" name="submit" style="height: 30px;">
+            </td>
+        </tr>
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+<script type="text/javascript">
+    $('.form1').submit(function(){
+        if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+            return confirm('删除后不可恢复，您确定删除吗？');
+        }
+        return false;
+    });
+
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.search').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    var status=$("#status").val();
+    if(status){
+        $('.pagination li').each(function(e){
+            var href = $('.pagination li').eq(e).find('a').attr('href');
+            $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+            $('.pagination li').eq(e).find('a').attr('data-href', href);
+        });
+        $('.pagination li a').click(function(){
+            var href = $(this).attr('data-href');
+            $('.form-horizontal').prop('action', href);
+            $("button[type='submit']").click();
+        });
+    }
+
+    ///分页处理 - end
+</script>
+{/if}
+
+<!-- 编辑新增 -->
+{if $op == 'post'}
+<link rel="stylesheet" href="../addons/choujiang_page/resource/css/viewer.min.css">
+<script src="../addons/choujiang_page/resource/js/viewer.min.js"></script>
+<div class="pull-left">
+    <a href="{php echo $this->createWebUrl('choujiang_share_order',array('op' =>'content'))}" class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">返回</a>
+</div>
+<br/>
+<br/>
+<form class="form-horizontal share-order" id="form" action="{php echo $this->createWebUrl('choujiang_share_order',array('op' =>'add'))}" method="post">
+    <input type="hidden" name="submit" value="1">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">晒单管理</h3>
+        </div>
+        <div class="panel-body">
+            <input type="hidden" name="sd_id" value="{$item['id']}">
+
+            <div class="form-group" id="goods_id">
+
+                <label for="" class="control-label col-sm-2"><font style="vertical-align: middle;color: red">*</font>奖品id</label>
+                <div class="form-controls col-sm-2" style="margin-left: 15px;">
+                    <input type="text" name="goods_id" id="goodsId" value="{$item['goods_id']}" onchange="getGoodsInfo(this.value)"  class="form-control ng-pristine ng-untouched ng-valid ng-empty" >
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">填写已开奖的奖品id</div>
+            </div>
+            <div class="form-group" id="goods_id">
+
+                <label for="" class="control-label col-sm-2">序号</label>
+                <div class="form-controls col-sm-2" style="margin-left: 15px;">
+                    <input type="text" name="sort"  value="{$item['sort']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty" >
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">倒序排列</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">评价内容</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <textarea name="content" rows="5" class="form-control" value="{$item['sponsorship_content']}" placeholder='建议100字以内'>{$item['content']}</textarea>
+                    <!--<input type="text" name="content" value="{$item['content']}" maxlength="200" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">建议不要超过100个字</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">评价图片</label>
+                <input type="hidden" id="cover" value="{$item['cover_img']}">
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <div id="jq22" class="layer-photos-demo">
+                    {php echo tpl_form_field_multi_image('goods_images',$item['img']);}<!--多图-->
+                    </div>
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">最多4张</div>
+            </div>
+
+                <!--<img layer-pid="图片id，可以不写" layer-src="大图地址" src="缩略图" alt="图片名">-->
+                <!--<img layer-pid="图片id，可以不写" layer-src="大图地址" src="缩略图" alt="图片名">-->
+
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">审核</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                        <select name="status" class="form-control ng-pristine ng-untouched ng-valid ng-empty" id="kjfs">
+                            <option value="1" {if $item['status']==1} selected{/if}>待审核</option>
+                            <option value="2" {if $item['status']==2} selected{/if}>通过</option>
+                            <option value="-1" {if $item['status']==-1} selected{/if}>拒绝</option>
+                        </select>
+                </div>
+            </div>
+            <div class="form-group" id="refuse_reason" style="display: none">
+                <label for="" class="control-label col-sm-2">拒绝理由</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <textarea name="refuse_reason" rows="5" class="form-control" value="{$item['sponsorship_content']}" placeholder='建议100字以内'>{$item['refuse_reason']}</textarea>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="form-group">
+        <span class="col-sm-12">
+            <input name="token" type="hidden" value="{$_W['token']}" />
+            <span class="btn btn-primary col-lg-1" id="hidpost"  style="margin-left: 45%;">提交 </span>
+            <span class="btn btn-primary col-lg-1" id="post"  style="margin-left: 45%;">提交 </span>
+
+        </div>
+    </div>
+    <input type="hidden" id="sdUser" value="{$item['openid']}">
+</form>
+<input type="hidden" value="0" id="Infos">
+
+<!-- 选择用户 -->
+<div class="modal fade" id="user-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <!--<div class="modal-dialog" style="width:800px;top:360px;">-->
+
+        <!--<div class="modal-content">-->
+
+            <!--<input type="hidden" name="m" value=""/>-->
+
+            <!--<div class="modal-header">-->
+
+                <!--<button type="button" class="close close_user" data-dismiss="modal">-->
+                    <!--<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>-->
+                <!--</button>-->
+
+                    <!--<h4>选择用户</h4>-->
+
+            <!--</div>-->
+
+            <!--<div class="modal-body">-->
+
+                <!--<div class="row">-->
+
+                    <!--<div class="input-group">-->
+
+                        <!--<input type="text" class="form-control" name="keyword" value="" id="keyword_user" placeholder="请输入用户名称关键字">-->
+
+                        <!--<span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_users();">搜索</button></span>-->
+
+                    <!--</div>-->
+
+                <!--</div>-->
+
+                <!--<div id="module-menus" style="padding-top:5px;"><div style="max-height:500px;overflow:auto;min-width:750px;">-->
+
+                    <!--<table class="table table-hover" style="min-width:750px;">-->
+
+                        <!--<tbody id="user_list">-->
+
+                        <!--</tbody>-->
+
+                    <!--</table>-->
+
+                <!--</div>-->
+            <!--</div>-->
+
+        <!--</div>-->
+
+    <!--</div>-->
+
+<!--</div>-->
+
+{/if}
+{template 'common/footer'}
+
+<script>
+    var openid = $("#sdUser").val();
+    //通过奖品id获取奖品信息
+    function getGoodsInfo(id)
+    {
+        $.post("{php echo $this->createWebUrl('choujiang_share_order',array('op' =>'goodsInfo'))}",{id:id},function (res) {
+
+            var response = eval("(" + res + ")");
+            $('#goods_info').remove();
+            $('#erroo_message').remove();
+            var html='';
+            console.log(response.message)
+            if(response.type=='success'){
+                var htmlselect = '';
+                htmlselect+= '<select name="openid" class="form-control ng-pristine ng-untouched ng-valid ng-empty" id="share_user">';
+                for (var i = 0; i < response.message.user.length; i++) {
+                    if(response.message.user[i].openid == openid){
+                        htmlselect+= '<option value="'+response.message.user[i].openid+'" selected >'+response.message.user[i].nickname+'</option>';
+                    }else{
+                        htmlselect+= '<option value="'+response.message.user[i].openid+'" >'+response.message.user[i].nickname+'</option>';
+                    }
+
+                }
+                htmlselect+= '</select>';
+                // var goods_icon = '';
+                // for (var i = 0; i < response.message.goods_icon.length; i++) {
+                //     goods_icon += '<img style="width: 188px;height: 100px;" src="'+response.message.goods_icon[i]+'"/>';
+                // }
+                html+='<div id="goods_info">';
+                html+='<div class="form-group" >';
+                html+='<label for="" class="control-label col-sm-2">奖品名称</label>';
+                html+=' <div class="form-controls col-sm-5" style="margin-left: 15px;">';
+                html+="<input name='goods_name' value='"+response.message.goods_name+"' disabled class='form-control ng-pristine ng-untouched ng-valid ng-empty'>";
+                html+='</div>';
+                html+='</div>';
+                html+='<div class="form-group">';
+                html+='<label for="" class="control-label col-sm-2">奖品缩略图</label>';
+                html+='<div class="form-controls col-sm-5" style="margin-left: 15px;">';
+                html+='<img style="width: 188px;height: 100px;" src="'+response.message.goods_icon+'"/>';
+                // html+=goods_icon;
+                html+='</div>';
+                html+='</div>';
+                html+='<div class="form-group">';
+                html+='<label for="" class="control-label col-sm-2">晒单人</label>';
+                html+='<div class="form-controls col-sm-5" style="margin-left: 15px;">';
+                html+= htmlselect;
+                html+='</div>';
+                html+='</div>';
+                html+='</div>';
+                $("#goods_id").after(html)
+            }else{
+                html+='<div class="form-group" id="erroo_message">';
+                html+='<label for="" class="control-label col-sm-2"></label>';
+                html+='<div class="form-controls col-sm-5" style="margin-left: 15px;">';
+                html+="<span style='color: red' id='error'>"+response.message+"</span>";
+                html+='</div>';
+                html+='</div>';
+                $("#goods_id").after(html)
+            }
+        })
+    }
+
+    //拒绝
+    $("select[name='status']").change(function () {
+        var reason=$(this).val();
+        if(reason==-1){
+            $("#refuse_reason").css('display','block')
+        }else{
+            $("#refuse_reason").css('display','none')
+        }
+
+    })
+    $(document).ready(function () {
+        //图片查看
+        var reason=$("select[name='status']").val();
+        console.log(reason)
+        if(reason==-1){
+            $("#refuse_reason").css('display','block');
+        }else{
+            $("#refuse_reason").css('display','none');
+        }
+
+        var viewer = new Viewer(document.getElementById('jq22'));
+        $('.multi-item').append('<div style="text-align: center"><input name="index" type="radio" value="" class="cover">设为封面</div>');
+
+        $('.multi-img-details .multi-item').each(function () {
+            var val = $(this).find("input[name='goods_images[]']").val();
+            $(this).find('.cover').val(val);
+            var img_url = $('#cover').val();
+            var img_val = val.substring(val.indexOf(".com/")+5,val.indexOf("?"));
+            if(img_val == img_url){
+                $(this).find('.cover').attr("checked","checked");
+
+            }
+        })
+        var goodsId = $('#goodsId').val();
+        $(".multi-img-details").css("width","800px");
+        if(goodsId!=''){
+            getGoodsInfo(goodsId);
+        }
+        $('#hidpost').hide();
+    })
+
+    //提交表单
+    $('#post').on('click',function () {
+        var spanobj= $('#post');
+        var spanobjP=$('#hidpost');
+        spanobj.hide();
+        spanobjP.show();
+        $("#loading").css('display','block')
+        var error = $('#error').text();
+        if(error){
+            $("#loading").css('display','none')
+            spanobj.show();
+            spanobjP.hide();
+            alert('请填写已开奖的奖品id');
+            return false;
+        }
+        $.post($('.share-order').attr('action'),$('.share-order').serialize(),function (res) {
+            $("#loading").css('display','none')
+            var response = eval("(" + res + ")");
+            if(response.type=='success'){
+                alert(response.message);
+                location.href=response.redirect;
+            }else{
+                spanobj.show();
+                spanobjP.hide();
+                alert(response.message);
+            }
+        })
+    })
+
+    function limitNum() {
+        var num=$("#goods_num").val();
+        var people=$("input[name='cj[smoke_num]']").val();
+        if(num>100000){
+            $("#goods_num").val(100000);
+        }
+        if(people>1024){
+            $("input[name='cj[smoke_num]']").val(1024)
+        }
+    }
+    $(document).ready(function () {
+        var img=$("input[name='img_url']").val();
+        $("input[name='cj[goods_icon]']").parent().next().find(".img-responsive").attr('src', img);
+    })
+
+    $(".btn_seluser").click(function(){
+
+        $('#user-info').modal('show');
+        $('#Infos').val(0);
+
+    });
+    $(".btn_seluser1").click(function(){
+        var user_nicknames = $("#user_nicknames").val();
+        var goods_num = $("#goods_num").val();
+        $('#Infos').val(1);
+        $('#user-info').modal('show');
+
+    });
+    // $("#kjfs").change(function(){
+    //     var index = $(this).children('option:selected').val();
+    //     if(index == 0){
+    //         $("#kjsj").css("display","block");
+    //         $("#kjrs").css("display","none");
+    //     }else if(index == 1){
+    //         $("#kjsj").css("display","none");
+    //         $("#kjrs").css("display","block");
+    //     }else{
+    //         $("#kjsj").css("display","none");
+    //         $("#kjrs").css("display","none");
+    //     }
+    // });
+
+
+
+
+
+</script>
+

@@ -1,0 +1,427 @@
+<link rel="stylesheet" href="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.css">
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/vue.js"></script>
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.js"></script>
+{template 'common/header'}
+
+<style>
+    #app table {
+        font-size:14px;
+    }
+    .el-button, .el-button+.el-button {
+         margin-left: 0px;
+        margin-bottom: 2px;
+    }
+    .el-table--medium td, .el-table--medium th {
+        padding: 5px 0;
+        padding-top: 5px;
+    }
+    .el-table .cell, .el-table th div, .el-table--border td:first-child .cell, .el-table--border th:first-child .cell {
+        padding-left: 5px;
+    }
+    .el-table .cell, .el-table th div {
+        padding-right: 5px;
+    }
+    .el-form-item__label,.el-form-item__content {
+        line-height: 20px;
+    }
+    .el-form-item {
+        margin-bottom: 11px;
+    }
+    .el-form-item__content p {
+        word-wrap: break-word;
+        word-break: break-all;
+        overflow: hidden;
+    }
+    .el-form--inline .el-form-item__label, el-form--inline .el-form-item__content {
+        line-height: 40px;
+    }
+    .el-dialog--center .el-dialog__body {
+        padding-bottom: 5px;
+    }
+    .topborder .el-dialog__footer {
+        border-top: 1px solid #eee;
+    }
+</style>
+
+
+<div id="app" style="text-align:center;min-height: 600px">
+
+    <el-button type="primary" @click="onAdd" style="margin-bottom:20px;float:right;">新增公告</el-button>
+    <!--<el-form style="text-align: right;" :inline="true" :model="formInline" class="demo-form-inline">-->
+        <!--<el-form-item label="字段" style="width:130px;">-->
+            <!--<el-select v-model="formInline.fields" style="width:80px;" placeholder="字段">-->
+                <!--<el-option label="全部" value="0"></el-option>-->
+                <!--<el-option label="openid" value="1"></el-option>-->
+                <!--<el-option label="昵称" value="2"></el-option>-->
+            <!--</el-select>-->
+        <!--</el-form-item>-->
+        <!--<el-form-item label="">-->
+            <!--<el-input v-model="formInline.keywords" placeholder="openid/昵称"></el-input>-->
+        <!--</el-form-item>-->
+        <!--<el-form-item>-->
+            <!--<el-button type="primary" @click="onSearch">查询</el-button>-->
+            <!--<el-button type="primary" @click="onAdd">新增公告</el-button>-->
+        <!--</el-form-item>-->
+    <!--</el-form>-->
+
+
+    <template>
+        <el-table
+                :data="tableData"
+                border
+                @sort-change="sort_change"
+                size = medium
+                style="width: 100%"
+                :default-sort = "{prop: 'id', order: 'descending'}"
+        >
+            <el-table-column
+                    prop="id"
+                    align = "center"
+                    label="ID"
+                    width="52px"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']">
+            </el-table-column>
+            <el-table-column
+                    prop="message"
+                    label="通知详情">
+            </el-table-column>
+            <el-table-column
+                    prop="start_at"
+                    width="100px"
+                    label="开始时间">
+            </el-table-column>
+            <el-table-column
+                    prop="end_at"
+                    width="100px"
+                    label="结束时间">
+            </el-table-column>
+            <el-table-column
+                    prop="sort_num"
+                    width="50px"
+                    label="排序">
+            </el-table-column>
+            <el-table-column
+                    prop="update_at"
+                    width="150px"
+                    label="创建日期">
+            </el-table-column>
+            <el-table-column
+                    align = "center"
+                    width="150px"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                    <el-button size="mini" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+    <div style="margin-top:15px;">
+        <el-pagination background @current-change="current_change" layout="total, prev, pager, next" :total="total" :page-size="pageNum"></el-pagination>
+    </div>
+
+    <template>
+        <div>
+            <el-dialog title="添加公告" :visible.sync="noticeVisible" width="500px" center>
+
+                <el-form :model="addForm" label-width="80px">
+                    <el-form-item label="公告内容*">
+                        <el-input type="textarea" v-model="addForm.message"></el-input>
+                    </el-form-item>
+                    <el-form-item label="开始日期*">
+                        <el-col :span="11">
+                            <el-date-picker type="date" value-format="yyyy-MM-dd" placeholder="选择日期" v-model="addForm.start_at" style="width: 100%;"></el-date-picker>
+                        </el-col>
+                    </el-form-item>
+                    <el-form-item label="结束日期*">
+                        <el-col :span="11">
+                            <el-date-picker type="date" value-format="yyyy-MM-dd" placeholder="选择日期" v-model="addForm.end_at" style="width: 100%;"></el-date-picker>
+                        </el-col>
+                    </el-form-item>
+                    <el-form-item label="公告排序">
+                        <el-input v-model="addForm.sort_num"></el-input>
+                        <span style="padding-top:10px;display: inline-block;color:#dcdfe6;">公告排序，默认为0排第一</span>
+                    </el-form-item>
+                    <el-form-item style="text-align: center;">
+                        <el-button type="primary" v-if="!noticeEdit" @click="addNotice">立即创建</el-button>
+                        <el-button type="primary" v-if="noticeEdit" @click="editOneNotice">编辑</el-button>
+                        <el-button @click="noticeVisible = false">取消</el-button>
+                    </el-form-item>
+                </el-form>
+
+            </el-dialog>
+        </div>
+    </template>
+
+
+</div>
+<script>
+
+
+    var app = new Vue({
+        el: "#app",
+        data: function () {
+            return {
+                tableData: [],
+                noticeVisible:false,
+                noticeEdit: false,
+                addForm: [],
+                dialogVisible:false,
+                listField: "id",
+                pageNum:15,
+                page:1,
+                total:0,
+                noNext:false,
+                sort: "desc",
+                recordData: [],
+                recordListVisible:false,
+                recordpageNum:10,
+                recordpage:1,
+                recordtotal:0,
+                recordnoNext:false,
+                recordsort: "desc",
+                openid : 0,
+                editRow : 0,
+                form: [],
+                auditorVisible: false,
+                options: [{
+                    value: '1',
+                    label: '通过'
+                }, {
+                    value: '2',
+                    label: '拒绝'
+                }, {
+                    value: '3',
+                    label: '拒绝并不可编辑'
+                }, {
+                    value: '4',
+                    label: '删除'
+                }],
+                auditor: '',
+                auditorInfo: [],
+                auditorIndex: 0,
+                auditorSelect: '',
+                refuseStatus: 0,
+                refuseReason: '',
+                formInline: {
+                    // do : "",
+                    // fields : "",
+                    // keywords : "",
+                },
+            }
+        },
+        methods: {
+            onAdd: function () {
+                this.addForm = {};
+                this.noticeEdit = false;
+                this.noticeVisible = true;
+            },
+            addNotice: function () {
+                var self =this;
+                // 公告消息不能为空
+                if ( this.addForm.message == '' || this.addForm.message == undefined || this.addForm.message == "undefinde" ) {
+                    alert("公告消息不能为空");
+                    return false;
+                }
+
+                // 公告消息不能为空
+                if ( this.addForm.start_at == '' || this.addForm.start_at == undefined || this.addForm.start_at == "undefinde" ) {
+                    alert("开始时间不能为空");
+                    return false;
+                }
+
+                // 公告消息不能为空
+                if ( this.addForm.end_at == '' || this.addForm.end_at == undefined || this.addForm.end_at == "undefinde" ) {
+                    alert("结束时间为空");
+                    return false;
+                }
+                console.log(this.addForm);
+                // return false;
+                /// 提交参数
+                var formDataInfo = {
+                    message : this.addForm.message,
+                    sort_num : this.addForm.sort_num,
+                    start_at : this.addForm.start_at,
+                    end_at : this.addForm.end_at,
+                };
+
+                if (confirm("立即提交吗？")) {
+                    /// 异步请求数据
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        data: formDataInfo,
+                        url: "{php echo $this->createWeburl('addNotice', array('state'=>'cj_admin_notice'));}",
+                        success: function (json) {
+                            /// 判断是否有返回数据
+                            if (json.code != 10000) {
+                                alert(json.msg);
+                                return false;
+                            }
+                            self.noticeVisible = false;
+                            self.load_data();
+                            alert("添加通知成功");
+
+                        },
+                        error: function (json) {
+                            alert("加载失败");
+                        }
+                    });
+                }
+            },
+            editOneNotice: function () {
+                var self =this;
+                // 公告消息不能为空
+                if ( this.addForm.message == '' ) {
+                    alert("公告消息不能为空");
+                    return false;
+                }
+
+                // 公告消息不能为空
+                if ( this.addForm.start_at == '' ) {
+                    alert("开始时间不能为空");
+                    return false;
+                }
+
+                // 公告消息不能为空
+                if ( this.addForm.end_at == '' ) {
+                    alert("结束时间为空");
+                    return false;
+                }
+
+                /// 提交参数
+                var formDataInfo = {
+                    id : this.addForm.id,
+                    message : this.addForm.message,
+                    sort_num : this.addForm.sort_num,
+                    start_at : this.addForm.start_at,
+                    end_at : this.addForm.end_at
+                };
+
+                if (confirm("要提交编辑吗？")) {
+                    /// 异步请求数据
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        data: formDataInfo,
+                        url: "{php echo $this->createWeburl('editNotice', array('state'=>'cj_admin_notice'));}",
+                        success: function (json) {
+                            /// 判断是否有返回数据
+                            if (json.code != 10000) {
+                                alert(json.msg);
+                                return false;
+                            }
+                            self.noticeVisible = false;
+                            self.load_data();
+                            alert("编辑公告成功");
+
+                        },
+                        error: function (json) {
+                            alert("加载失败");
+                        }
+                    });
+                }
+            },
+            onSearch:function() {
+                this.page = 1;
+                if ( this.formInline.keywords != "" && this.formInline.fields == undefined ) {
+                    alert("输入关键词后，搜索字段不能为空");
+                    return false;
+                }
+                this.load_data();
+            },
+            sort_change:function(prop){
+                var self = this;
+                this.listField = prop.prop;
+                if (prop.order == "descending" || prop.order==null) {
+                    this.sort = 'desc';
+                } else {
+                    this.sort = 'asc';
+                }
+                self.load_data();
+            },
+            current_change:function(currentPage){
+                var self = this;
+                this.page = currentPage;
+
+                self.load_data();
+            },
+            load_data:function( a ){
+                var self = this;
+                for (var i =0; i <10; i++ ) {}
+
+                /// 提交参数
+                var formDataInfo = {
+                    page : self.page,
+                    ajaxGet : "true",
+                    pageNum : self.pageNum,
+                    sort : self.sort,
+                    listField : self.listField,
+                    fields : self.formInline.fields,
+                    keywords : self.formInline.keywords,
+                };
+
+                /// 异步请求数据
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    data : formDataInfo,
+                    url : "{php echo $this->createWeburl('noticeList', array('op'=>'noticeList','state'=>'cj_admin_notice'));}",
+                    success : function(json) {
+                        /// 判断是否有返回数据
+                        if (json.data.length == 0) {
+                            alert("没有数据");
+                            return false;
+                        }
+                        self.tableData = json.data;
+                        self.total = json.total;
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+            },
+
+
+            handleDelete:function(index, row) {
+                var self = this;
+                if (confirm("确认要删除吗？")) {
+                    /// 异步请求数据
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        data: {id: row.id},
+                        url: "{php echo $this->createWeburl('deleteNotice', array('state'=>'cj_admin_notice'));}",
+                        success: function (json) {
+                            /// 判断是否有返回数据
+                            if (json.code != 10000) {
+                                alert(json.msg);
+                                return false;
+                            }
+                            self.noticeVisible = false;
+                            self.load_data();
+                            alert("删除成功");
+
+                        },
+                        error: function (json) {
+                            alert("加载失败");
+                        }
+                    });
+                }
+            },
+            handleEdit:function(index, row) {
+                this.addForm = row;
+                this.noticeEdit = true;
+                this.noticeVisible = true;
+            },
+
+        },
+        created: function(){
+            this.load_data();
+        }
+    });
+
+</script>
+
+{template 'common/footer'}

@@ -1,0 +1,673 @@
+<link rel="stylesheet" href="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.css">
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/vue.js"></script>
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.js"></script>
+{template 'common/header'}
+
+<style>
+    #app table {
+        font-size:14px;
+    }
+    .el-button, .el-button+.el-button {
+         margin-left: 0px;
+        margin-bottom: 2px;
+    }
+    .el-table--medium td, .el-table--medium th {
+        padding: 5px 0;
+        padding-top: 5px;
+    }
+    .el-table .cell, .el-table th div, .el-table--border td:first-child .cell, .el-table--border th:first-child .cell {
+        padding-left: 5px;
+    }
+    .el-table .cell, .el-table th div {
+        padding-right: 5px;
+    }
+    .el-form-item__label,.el-form-item__content {
+        line-height: 20px;
+    }
+    .el-form-item {
+        margin-bottom: 11px;
+    }
+    .el-form-item__content p {
+        word-wrap: break-word;
+        word-break: break-all;
+        overflow: hidden;
+    }
+    .el-form--inline .el-form-item__label, el-form--inline .el-form-item__content {
+        line-height: 40px;
+    }
+    .el-dialog--center .el-dialog__body {
+        padding-bottom: 5px;
+    }
+    .topborder .el-dialog__footer {
+        border-top: 1px solid #eee;
+    }
+</style>
+
+<ul class="nav nav-tabs">
+    <li {if $op == 'userList'|| $op == ""}class="active"{/if}><a href="{php echo $this->createWeburl('scoreList', array('op'=>'userList', 'state'=>'cj_admin_score'));}">用户积分</a></li>
+    <li {if $op == 'scroeRecordList'}class="active"{/if}><a href="{php echo $this->createWeburl('scoreList', array('op'=>'scroeRecordList', 'state'=>'cj_admin_score'));}">积分记录</a></li>
+</ul>
+
+{if $op == 'userList'|| $op == ""}
+<div id="app" style="text-align:center;min-height: 600px">
+
+
+    <el-form style="text-align: right;" :inline="true" :model="formInline" class="demo-form-inline">
+        <el-form-item label="字段" style="width:130px;">
+            <el-select v-model="formInline.fields" style="width:80px;" placeholder="字段">
+                <el-option label="全部" value="0"></el-option>
+                <el-option label="openid" value="1"></el-option>
+                <el-option label="昵称" value="2"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="">
+            <el-input v-model="formInline.keywords" placeholder="openid/昵称"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSearch">查询</el-button>
+        </el-form-item>
+    </el-form>
+
+
+    <template>
+        <el-table
+                :data="tableData"
+                border
+                @sort-change="sort_change"
+                size = medium
+                style="width: 100%"
+                :default-sort = "{prop: 'id', order: 'descending'}"
+        >
+            <el-table-column
+                    prop="id"
+                    align = "center"
+                    label="ID"
+                    width="52px"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']">
+            </el-table-column>
+            <el-table-column
+                    prop="openid"
+                    width="280px"
+                    label="openid">
+            </el-table-column>
+            <el-table-column
+                    prop="nickname"
+                    width="100px"
+                    label="昵称">
+            </el-table-column>
+            <el-table-column
+                    prop="total_score"
+                    width="55px"
+                    label="总积分">
+            </el-table-column>
+            <el-table-column
+                    prop="use_score"
+                    label="使用积分"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']">
+            </el-table-column>
+            <el-table-column
+                    prop="total_score"
+                    label="可用积分"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']">
+                <template slot-scope="scope">
+                    <span>{{scope.row.total_score-scope.row.use_score}}</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="update_at"
+                    width="150px"
+                    label="日期">
+            </el-table-column>
+            <el-table-column
+                    align = "center"
+                    width="100px"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-button size="mini" @click="handleRecord(scope.$index, scope.row)">详情</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+    <div style="margin-top:15px;">
+        <el-pagination background @current-change="current_change" layout="total, prev, pager, next" :total="total" :page-size="pageNum"></el-pagination>
+    </div>
+
+    <template>
+        <div>
+            <el-dialog title="积分列表" :visible.sync="recordListVisible" width="65%" center>
+                <template>
+                    <el-table
+                            :data="recordData"
+                            border
+                            @sort-change="sort_change_record"
+                            size = medium
+                            max-height="500"
+                            style="width: 100%"
+                            :default-sort = "{prop: 'id', order: 'descending'}"
+                    >
+                        <el-table-column
+                                prop="id"
+                                align = "center"
+                                label="ID"
+                                sortable="true"
+                                width="52px"
+                                :sort-orders="['ascending', 'descending']">
+                        </el-table-column>
+                        <el-table-column
+                                prop="openid"
+                                label="openid">
+                        </el-table-column>
+                        <el-table-column
+                                prop="all_score"
+                                width="55px"
+                                label="总积分">
+                        </el-table-column>
+                        <el-table-column
+                                prop="achieve_score"
+                                width="70px"
+                                label="本次积分">
+                        </el-table-column>
+                        <el-table-column
+                                prop="balance_score"
+                                width="70px"
+                                label="可用积分">
+                        </el-table-column>
+                        <el-table-column
+                                prop="extact.getInfo"
+                                label="详情">
+                        </el-table-column>
+                        <el-table-column
+                                prop="update_at"
+                                sortable="true"
+                                :sort-orders="['ascending', 'descending']"
+                                label="日期">
+                        </el-table-column>
+                    </el-table>
+                </template>
+                <div style="margin-top:15px;text-align: center;">
+                    <el-pagination background @current-change="current_change_record" layout="total, prev, pager, next" :total="recordtotal" :page-size="recordpageNum"></el-pagination>
+                </div>
+            </el-dialog>
+        </div>
+    </template>
+
+
+
+</div>
+<script>
+
+
+    var app = new Vue({
+        el: "#app",
+        data: function () {
+            return {
+                tableData: [],
+                dialogVisible:false,
+                listField: "id",
+                pageNum:15,
+                page:1,
+                total:0,
+                noNext:false,
+                sort: "desc",
+                recordData: [],
+                recordListVisible:false,
+                recordpageNum:10,
+                recordpage:1,
+                recordtotal:0,
+                recordnoNext:false,
+                recordsort: "desc",
+                openid : 0,
+                editRow : 0,
+                form: [],
+                auditorVisible: false,
+                options: [{
+                    value: '1',
+                    label: '通过'
+                }, {
+                    value: '2',
+                    label: '拒绝'
+                }, {
+                    value: '3',
+                    label: '拒绝并不可编辑'
+                }, {
+                    value: '4',
+                    label: '删除'
+                }],
+                auditor: '',
+                auditorInfo: [],
+                auditorIndex: 0,
+                auditorSelect: '',
+                refuseStatus: 0,
+                refuseReason: '',
+                formInline: {
+                    // do : "",
+                    // fields : "",
+                    // keywords : "",
+                },
+            }
+        },
+        methods: {
+            onSearch:function() {
+                this.page = 1;
+                if ( this.formInline.keywords != "" && this.formInline.fields == undefined ) {
+                    alert("输入关键词后，搜索字段不能为空");
+                    return false;
+                }
+                this.load_data();
+            },
+            sort_change:function(prop){
+                var self = this;
+                this.listField = prop.prop;
+                if (prop.order == "descending" || prop.order==null) {
+                    this.sort = 'desc';
+                } else {
+                    this.sort = 'asc';
+                }
+                self.load_data();
+            },
+            current_change:function(currentPage){
+                var self = this;
+                this.page = currentPage;
+
+                self.load_data();
+            },
+            load_data:function( a ){
+                var self = this;
+                for (var i =0; i <10; i++ ) {}
+
+                /// 提交参数
+                var formDataInfo = {
+                    page : self.page,
+                    ajaxGet : "true",
+                    pageNum : self.pageNum,
+                    sort : self.sort,
+                    listField : self.listField,
+                    fields : self.formInline.fields,
+                    keywords : self.formInline.keywords,
+                };
+
+                /// 异步请求数据
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    data : formDataInfo,
+                    url : "{php echo $this->createWeburl('scoreList', array('op'=>'userList','state'=>'cj_admin_score'));}",
+                    success : function(json) {
+                        /// 判断是否有返回数据
+                        if (json.data.length == 0) {
+                            alert("没有数据");
+                            return false;
+                        }
+                        self.tableData = json.data;
+                        self.total = json.total;
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+            },
+
+
+            /// 用户详细积分列表使用函数-----start
+            handleRecord:function(index, row) {
+                var self = this;
+                self.openid = row.openid;
+                self.recordpage = 1;
+                self.recordData = [];
+                self.recordtotal = 0;
+                self.load_data_record(row.openid);
+            },
+            current_change_record:function(currentPage){
+                this.recordpage = currentPage;
+                this.load_data_record(this.openid);
+            },
+            sort_change_record:function(prop){
+                // this.listField = prop.prop;
+                if (prop.order == "descending" || prop.order==null) {
+                    this.recordsort = 'desc';
+                } else {
+                    this.recordsort = 'asc';
+                }
+
+                this.load_data_record(this.openid);
+            },
+            load_data_record:function( openid ){
+                var self = this;
+
+                if( openid == 0 || openid == '' ){
+                    alert("心愿id必填");
+                    return false;
+                }
+                for (var i =0; i <10; i++ ) {}
+
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    data : {
+                        page : self.recordpage,
+                        pageNum : self.recordpageNum,
+                        sort : self.recordsort,
+                        openid : openid,
+                    },
+                    url : "{php echo $this->createWeburl('scoreListUser', array('op'=>'content','state'=>'cj_admin_score'));}",
+                    success : function(json) {
+                        self.recordData = json.data;
+                        self.recordtotal = json.total;
+                        self.recordListVisible = true;
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+            },
+            /// 用户详细积分列表使用函数-----end
+        },
+        created: function(){
+            this.load_data();
+        }
+    });
+
+
+
+    function ShowElement(element) {
+        var inputName = element.getAttribute("data");
+
+        var oldhtml = element.innerHTML;
+        //创建新的input元素
+        var newobj = document.createElement('input');
+        //为新增元素添加类名
+        newobj.setAttribute('class','el-input__inner');
+        //为新增元素添加类型
+        newobj.type = 'text';
+        //为新增元素添加value值
+        newobj.value = oldhtml;
+        //为新增元素添加光标离开事件
+        newobj.onblur = function() {
+            //当触发时判断新增元素值是否为空，为空则不修改，并返回原有值
+            element.innerHTML = this.value == oldhtml ? oldhtml : this.value;
+
+            var varlnew = this.value == oldhtml ? oldhtml : this.value;
+
+            app.form[inputName] = varlnew;
+
+            //当触发时设置父节点的双击事件为ShowElement
+            element.setAttribute("ondblclick", "ShowElement(this);");
+        }
+        //设置该标签的子节点为空
+        element.innerHTML = '';
+        //添加该标签的子节点，input对象
+        element.appendChild(newobj);
+        //设置选择文本的内容或设置光标位置（两个参数：start,end；start为开始位置，end为结束位置；如果开始位置和结束位置相同则就是光标位置）
+        newobj.setSelectionRange(0, oldhtml.length);
+        //设置获得光标
+        newobj.focus();
+
+        //设置父节点的双击事件为空
+        newobj.parentNode.setAttribute("ondblclick", "");
+
+    }
+</script>
+{/if}
+
+{if $op == 'scroeRecordList'}
+<div id="app" style="text-align:center;min-height: 600px">
+
+
+    <el-form style="text-align: right;" :inline="true" :model="formInline" class="demo-form-inline">
+        <el-form-item label="字段" style="width:130px;">
+            <el-select v-model="formInline.fields" style="width:80px;" placeholder="字段">
+                <el-option label="全部" value="0"></el-option>
+                <el-option label="openid" value="1"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="">
+            <el-input v-model="formInline.keywords" placeholder="openid/昵称"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSearch">查询</el-button>
+        </el-form-item>
+    </el-form>
+
+
+    <template>
+        <el-table
+                :data="tableData"
+                border
+                @sort-change="sort_change"
+                size = medium
+                style="width: 100%"
+                :default-sort = "{prop: 'id', order: 'descending'}"
+        >
+            <el-table-column
+                    prop="id"
+                    align = "center"
+                    label="ID"
+                    width="52px"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']">
+            </el-table-column>
+            <el-table-column
+                    prop="openid"
+                    width="280px"
+                    label="openid">
+            </el-table-column>
+            <el-table-column
+                    prop="all_score"
+                    width="55px"
+                    label="总积分">
+            </el-table-column>
+            <el-table-column
+                    prop="achieve_score"
+                    width="70px"
+                    label="本次积分">
+            </el-table-column>
+            <el-table-column
+                    prop="balance_score"
+                    width="70px"
+                    label="可用积分">
+            </el-table-column>
+            <el-table-column
+                    prop="extact.getInfo"
+                    label="详情">
+            </el-table-column>
+            <el-table-column
+                    prop="update_at"
+                    width="150px"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']"
+                    label="日期">
+            </el-table-column>
+            <el-table-column
+                    align = "center"
+                    width="100px"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-button size="mini" @click="handleRecord(scope.$index, scope.row)">详情</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+    <div style="margin-top:15px;">
+        <el-pagination background @current-change="current_change" layout="total, prev, pager, next" :total="total" :page-size="pageNum"></el-pagination>
+    </div>
+
+
+    <template>
+        <div>
+            <el-dialog class="topborder" title="详情" :visible.sync="dialogVisible" width="60%"  center>
+                <el-form id="tf" class="EditForm" ref="form" :model="form" label-width="120px">
+                    <el-form-item label="ID" style="width:50%;float:left;">
+                        <p>{{form.id}}</p>
+                    </el-form-item>
+                    <el-form-item label="openid" style="width:50%;float:left;">
+                        <p>{{form.openid}}</p>
+                    </el-form-item>
+                    <el-form-item label="本次积分" style="width:50%;float:left;">
+                        <p>{{form.achieve_score}}</p>
+                    </el-form-item>
+                    <el-form-item label="总积分" style="width:50%;float:left;">
+                        <p>{{form.all_score}}</p>
+                    </el-form-item>
+                    <el-form-item label="剩余积分" style="width:50%;float:left;">
+                        <p>{{form.balance_score}}</p>
+                    </el-form-item>
+                    <el-form-item label="积分详情" style="width:50%;float:left;">
+                        <p>{{form.extact}}</p>
+                    </el-form-item>
+                    <el-form-item label="拒绝理由" style="width:50%;float:left;">
+                        <p>{{form.score_types}}</p>
+                    </el-form-item>
+                    <el-form-item label="创建时间" style="width:50%;float:left;">
+                        <p>{{form.create_at}}</p>
+                    </el-form-item>
+                    <el-form-item label="更新时间" style="width:50%;float:left;">
+                        <p>{{form.update_at}}</p>
+                    </el-form-item>
+                    <div style="clear:both;"></div>
+                </el-form>
+                <span slot="footer" text="center" class="dialog-footer">
+                    <el-button @click="dialogVisible = false">关闭</el-button>
+                </span>
+            </el-dialog>
+        </div>
+    </template>
+
+</div>
+<script>
+
+
+    var app = new Vue({
+        el: "#app",
+        data: function () {
+            return {
+                tableData: [],
+                dialogVisible:false,
+                listField: "id",
+                pageNum:15,
+                page:1,
+                total:0,
+                noNext:false,
+                sort: "desc",
+                editRow : 0,
+                form: [],
+                auditorVisible: false,
+                auditor: '',
+                auditorInfo: [],
+                auditorIndex: 0,
+                auditorSelect: '',
+                refuseStatus: 0,
+                refuseReason: '',
+                formInline: {
+                    // do : "",
+                    // fields : "",
+                    // keywords : "",
+                },
+            }
+        },
+        methods: {
+            onSearch:function() {
+                this.page = 1;
+                if ( this.formInline.keywords != "" && this.formInline.fields == undefined ) {
+                    alert("输入关键词后，搜索字段不能为空");
+                    return false;
+                }
+                this.load_data();
+            },
+            sort_change:function(prop){
+                var self = this;
+                this.listField = prop.prop;
+                if (prop.order == "descending" || prop.order==null) {
+                    this.sort = 'desc';
+                } else {
+                    this.sort = 'asc';
+                }
+                self.load_data();
+            },
+            current_change:function(currentPage){
+                var self = this;
+                this.page = currentPage;
+
+                self.load_data();
+            },
+            load_data:function( a ){
+                var self = this;
+                for (var i =0; i <10; i++ ) {}
+
+                /// 提交参数
+                var formDataInfo = {
+                    page : self.page,
+                    ajaxGet : "true",
+                    pageNum : self.pageNum,
+                    sort : self.sort,
+                    listField : self.listField,
+                    fields : self.formInline.fields,
+                    keywords : self.formInline.keywords,
+                };
+
+                /// 异步请求数据
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    data : formDataInfo,
+                    //url : "{php echo $this->createWeburl('wishingList', array('op'=>'content','state'=>'cj_admin_wishingWall'));}"+"&page="+self.page+"&pageNum="+self.pageNum+"&sort="+self.sort+"&listField="+self.listField,
+                    url : "{php echo $this->createWeburl('scoreList', array('op'=>'scroeRecordList','state'=>'cj_admin_score'));}",
+                    success : function(json) {
+                        /// 判断是否有返回数据
+                        if (json.data.length == 0) {
+                            alert("没有数据");
+                            return false;
+                        }
+                        self.tableData = json.data;
+                        self.total = json.total;
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+            },
+            auditorDo:function (select) {
+                var self = this;
+                // console.log(777777777);
+                // console.log(select);
+                if (select==2 || select==3) {
+                    self.refuseStatus = 1;
+                } else {
+                    self.refuseStatus = 0;
+                }
+                self.auditorSelect = select;
+            },
+            handleRecord:function(index, row) {
+                var self = this;
+
+                self.editRow = index;
+                // self.form = row;
+                // self.dialogVisible = true;
+                $.ajax({
+                    type : "GET",
+                    dataType : "json",
+                    contentType : "application/json",
+                    url : "{php echo $this->createWeburl('recrodDetails', array('state'=>'cj_admin_score'));}"+"&id="+row.id,
+                    success : function(json) {
+                        self.form = json.data;
+                        self.dialogVisible = true;
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+
+            },
+
+        },
+        created: function(){
+            this.load_data();
+        }
+    });
+
+</script>
+{/if}
+
+{template 'common/footer'}

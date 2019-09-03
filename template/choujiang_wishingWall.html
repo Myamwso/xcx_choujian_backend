@@ -1,0 +1,677 @@
+<link rel="stylesheet" href="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.css">
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/vue.js"></script>
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.js"></script>
+{template 'common/header'}
+
+<style>
+    #app table {
+        font-size:14px;
+    }
+    .el-button, .el-button+.el-button {
+         margin-left: 0px;
+        margin-bottom: 2px;
+    }
+    .el-table--medium td, .el-table--medium th {
+        padding: 5px 0;
+        padding-top: 5px;
+    }
+    .el-table .cell, .el-table th div, .el-table--border td:first-child .cell, .el-table--border th:first-child .cell {
+        padding-left: 5px;
+    }
+    .el-table .cell, .el-table th div {
+        padding-right: 5px;
+    }
+    .el-form-item__label,.el-form-item__content {
+        line-height: 20px;
+    }
+    .el-form-item {
+        margin-bottom: 11px;
+    }
+    .el-form-item__content p {
+        word-wrap: break-word;
+        word-break: break-all;
+        overflow: hidden;
+    }
+    .el-form--inline .el-form-item__label, el-form--inline .el-form-item__content {
+        line-height: 40px;
+    }
+    .el-dialog--center .el-dialog__body {
+        padding-bottom: 5px;
+    }
+    #app .TdMaxHeight div {
+        max-height: 46px;
+    }
+</style>
+
+<div id="app" style="text-align:center;min-height: 600px">
+
+
+    <el-form style="text-align: right;" :inline="true" :model="formInline" class="demo-form-inline">
+        <el-form-item label="筛选" style="width:150px;">
+            <el-select v-model="formInline.do" @change="searchChange" style="width:80px;" placeholder="筛选">
+                <el-option label="全部" value="0"></el-option>
+                <el-option label="本周" value="1"></el-option>
+                <el-option label="上周" value="2"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="字段" style="width:130px;">
+            <el-select v-model="formInline.fields" style="width:80px;" placeholder="字段">
+                <el-option label="openid" value="0"></el-option>
+                <el-option label="名称" value="1"></el-option>
+                <el-option label="id" value="2"></el-option>
+                <el-option label="用户名" value="3"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="">
+            <el-input v-model="formInline.keywords" placeholder="openid/id/心愿名称"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSearch">查询</el-button>
+        </el-form-item>
+    </el-form>
+
+
+    <template>
+        <el-table
+                :data="tableData"
+                border
+                @sort-change="sort_change"
+                size = medium
+                style="width: 100%"
+                :default-sort = "{prop: 'id', order: 'descending'}"
+        >
+            <el-table-column
+                    prop="id"
+                    align = "center"
+                    label="ID"
+                    width="52px"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']">
+            </el-table-column>
+            <el-table-column
+                    prop="nickname"
+                    label="用户">
+                <template slot-scope="scope">
+                    <img :src="scope.row.avatar" style="width:30px;" />{{ scope.row.nickname }}
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="goods_name"
+                    width="123px"
+                    label="图片(点击查看图)">
+                <template slot-scope="msg">
+                    <a target="_blank" v-bind:href ="msg.row.goods_img"><img :src="msg.row.goods_img" style="height:60px;" /></a>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="goods_name"
+                    label="名称">
+            </el-table-column>
+            <el-table-column
+                    prop="goods_price"
+                    width="70px"
+                    label="价格">
+            </el-table-column>
+            <!--<el-table-column-->
+                    <!--prop="goods_img"-->
+                    <!--label="图片">-->
+            <!--</el-table-column>-->
+            <el-table-column
+                    prop="goods_url"
+                    label="参考链接"
+                    class-name="TdMaxHeight">
+            </el-table-column>
+            <!--<el-table-column-->
+                    <!--prop="goods_info"-->
+                    <!--label="描述">-->
+            <!--</el-table-column>-->
+            <el-table-column
+                    prop="likes_num"
+                    align = "center"
+                    width="70px"
+                    label="想要"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']">
+                <template slot-scope="scope">
+                {{scope.row.likes_num}}<br><el-button v-if="scope.row.likes_num > 0" size="mini" @click="handleRecord(scope.$index, scope.row)">更多</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="status"
+                    align = "center"
+                    width="70px"
+                    label="状态"
+                    sortable="true"
+                    :sort-orders="['ascending', 'descending']">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.status == 0">待审核</span><span v-else-if="scope.row.status == 1">通过</span><span v-else-if="scope.row.status == 2">拒绝</span><span v-else>不可编辑</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="likes_num"
+                    align = "center"
+                    width="70px"
+                    label="达成情况">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.likes_num >= scope.row.accomplish_wishing" style="color:#ff0000;">达成</span>
+                    <span v-else>未达成</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="create_at"
+                    width="100px"
+                    label="日期">
+            </el-table-column>
+            <el-table-column
+                    align = "center"
+                    width="130px"
+                    label="操作">
+                <template slot-scope="scope">
+                    <!--<el-button v-if="scope.row.likes_num - scope.row.accomplish_wishing >= 0 && scope.row.release_goods == 0" size="mini" @click="handleRelease(scope.$index, scope.row)">发布</el-button>-->
+                    <el-button v-if="scope.row.release_goods != 1 && scope.row.week == 'last'" size="mini" @click="handleRelease(scope.$index, scope.row)">发布</el-button>
+                    <!--<el-button v-if="scope.row.status == 0" size="mini" @click="handleAudit(scope.$index, scope.row)">审核</el-button>-->
+                    <el-button v-if="scope.row.week == 'this'" size="mini" @click="handleAudit(scope.$index, scope.row)">审核</el-button>
+                    <el-button size="mini" @click="handleDetails(scope.$index, scope.row)">详情</el-button>
+                    <el-button v-if="scope.row.release_goods == 1" size="mini" @click="goodsDetails(scope.$index, scope.row)">查看奖品</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+    <div style="margin-top:15px;">
+        <el-pagination background @current-change="current_change" layout="total, prev, pager, next" :total="total" :page-size="pageNum"></el-pagination>
+    </div>
+
+    <template>
+        <div>
+            <el-dialog title="心愿详情" :visible.sync="dialogVisible" width="60%"  center>
+                <el-form id="tf" class="EditForm" ref="form" :model="form" label-width="120px">
+                    <el-form-item label="ID:" style="width:50%;float:left;">
+                        <p>{{form.id}}</p>
+                    </el-form-item>
+                    <el-form-item label="用户名:" style="width:50%;float:left;">
+                        <img :src="form.avatar" style="width:30px;" />{{ form.nickname }}
+                    </el-form-item>
+                    <el-form-item label="openid:" style="width:50%;float:left;">
+                        <p>{{form.openid}}</p>
+                    </el-form-item>
+                    <el-form-item label="*商品名称:" style="width:50%;float:left;">
+                        <p v-if="form.likes_num == 0" ondblclick="ShowElement(this)" data="goods_name">{{form.goods_name}}</p>
+                        <p v-else>{{form.goods_name}}</p>
+                        <!--<el-input type="hidden" id="goods_name" v-model="form.goods_name"></el-input>-->
+                    </el-form-item>
+                    <el-form-item label="*商品价格:" style="width:50%;float:left;">
+                        <p v-if="form.likes_num == 0" ondblclick="ShowElement(this)" data="goods_price">{{form.goods_price}}</p>
+                        <p v-else>{{form.goods_price}}</p>
+                    </el-form-item>
+                    <el-form-item label="*商品参考链接:" style="width:50%;float:left;">
+                        <p v-if="form.likes_num == 0" ondblclick="ShowElement(this)" data="goods_url">{{form.goods_url}}</p>
+                        <p v-else>{{form.goods_url}}</p>
+                    </el-form-item>
+                    <el-form-item label="*商品图片:" style="width:50%;float:left;">
+                        <p v-if="form.likes_num == 0" ondblclick="ShowElement(this)" data="goods_img">{{ form.goods_img }}</p>
+                        <p v-else>{{ form.goods_img }}</p>
+                        <a :href="form.goods_img" target="_blank"><img :src="form.goods_img" style="height:60px;" /></a>
+                    </el-form-item>
+                    <el-form-item label="*商品描述:" style="width:50%;float:left;">
+                        <p v-if="form.likes_num == 0" ondblclick="ShowElement(this)" data="goods_info">{{form.goods_info}}</p>
+                        <p v-else>{{form.goods_info}}</p>
+                    </el-form-item>
+                    <el-form-item label="审核状态:" style="width:50%;float:left;">
+                        <p v-if="form.status == 0">待审核</p>
+                        <p v-if="form.status == 1">通过</p>
+                        <p v-if="form.status == 2">拒绝</p>
+                        <p v-if="form.status == 3">拒绝不可编辑</p>
+                    </el-form-item>
+                    <el-form-item v-if="form.status == 2 || form.status == 3" label="拒绝理由" style="width:50%;float:left;">
+                        <p>{{form.refuse_reason}}</p>
+                    </el-form-item>
+                    <el-form-item label="点赞人数:" style="width:50%;float:left;">
+                        <p>{{form.likes_num}}</p>
+                    </el-form-item>
+                    <el-form-item label="*达成心愿数:" style="width:50%;float:left;">
+                        <p v-if="form.likes_num - form.accomplish_wishing < 0" ondblclick="ShowElement(this)" data="accomplish_wishing">{{form.accomplish_wishing}}</p>
+                        <p v-else>{{form.accomplish_wishing}}</p>
+                    </el-form-item>
+                    <el-form-item label="是否发布过商品:" style="width:50%;float:left;">
+                        <p>{{form.release_goods}}</p>
+                    </el-form-item>
+                    <el-form-item label="创建时间:" style="width:50%;float:left;">
+                        <p>{{form.create_at}}</p>
+                    </el-form-item>
+                    <el-form-item label="更新时间:" style="width:50%;float:left;">
+                        <p>{{form.update_at}}</p>
+                    </el-form-item>
+                    <div style="clear:both;"></div>
+                </el-form>
+                <span slot="footer" text="center" class="dialog-footer">
+                    <el-button @click="dialogVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="handleEdit(form.id)">编辑保存</el-button>
+                </span>
+            </el-dialog>
+        </div>
+    </template>
+
+    <template>
+        <div>
+            <el-dialog title="想要列表" :visible.sync="likesListVisible" width="60%" center>
+                <el-table
+                        :data="likesData"
+                        border
+                        @sort-change="sort_change_likes"
+                        size = medium
+                        style="width: 100%"
+                        max-height="500"
+                        :default-sort = "{prop: 'id', order: 'descending'}"
+                >
+                    <el-table-column
+                            prop="id"
+                            align = "center"
+                            label="ID"
+                            width="70px"
+                            sortable="true"
+                            :sort-orders="['ascending', 'descending']">
+                    </el-table-column>
+                    <el-table-column
+                            prop="openid"
+                            label="用户信息">
+                        <template slot-scope="scope">
+                            <img :src="scope.row.avatar" style="width:30px;" />{{ scope.row.nickname }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="openid"
+                            label="openid">
+                    </el-table-column>
+                    <el-table-column
+                            prop="update_at"
+                            label="日期">
+                    </el-table-column>
+                </el-table>
+                <div style="margin-top:15px;text-align: center;">
+                    <el-pagination background @current-change="current_change_likes" layout="total, prev, pager, next, jumper" :total="likestotal" :page-size="likespageNum"></el-pagination>
+                </div>
+            </el-dialog>
+        </div>
+    </template>
+
+    <template>
+        <div>
+            <el-dialog title="操作" :visible.sync="auditorVisible" width="200px" center>
+                <el-select style="margin-bottom:10px;" @change="auditorDo" v-model="auditor" placeholder="请选择">
+                    <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+                <el-input style="margin-bottom:10px;" v-if="refuseStatus == 1" v-model="refuseReason" placeholder="请输入内容"></el-input>
+                <div style="text-align: center;margin-bottom:10px;">
+                    <el-button @click="comfirmAudit" type="primary">确认编辑</el-button>
+                </div>
+            </el-dialog>
+        </div>
+    </template>
+
+
+</div>
+<script>
+
+
+    var app = new Vue({
+        el: "#app",
+        data: function () {
+            return {
+                tableData: [],
+                dialogVisible:false,
+                listField: "id",
+                pageNum:15,
+                page:1,
+                total:0,
+                noNext:false,
+                sort: "desc",
+                likesData: [],
+                likesListVisible:false,
+                likespageNum:10,
+                likespage:1,
+                likestotal:0,
+                likesnoNext:false,
+                likessort: "desc",
+                likeswishingId : 0,
+                editRow : 0,
+                form: [],
+                auditorVisible: false,
+                options: [{
+                    value: '1',
+                    label: '通过'
+                }, {
+                    value: '2',
+                    label: '拒绝'
+                }, {
+                    value: '3',
+                    label: '拒绝并不可编辑'
+                }, {
+                    value: '4',
+                    label: '删除'
+                }],
+                auditor: '',
+                auditorInfo: [],
+                auditorIndex: 0,
+                auditorSelect: '',
+                refuseStatus: 0,
+                refuseReason: '',
+                formInline: {
+                    // do : "",
+                    // fields : "",
+                    // keywords : "",
+                },
+            }
+        },
+        methods: {
+            onSearch:function() {
+                this.page = 1;
+                if ( this.formInline.keywords != "" && this.formInline.fields == undefined ) {
+                    alert("输入关键词后，搜索字段不能为空");
+                    return false;
+                }
+                this.load_data();
+            },
+            searchChange:function (aa) {
+                this.page = 1;
+                this.load_data();
+            },
+            sort_change:function(prop){
+                var self = this;
+                this.listField = prop.prop;
+                if (prop.order == "descending" || prop.order==null) {
+                    this.sort = 'desc';
+                } else {
+                    this.sort = 'asc';
+                }
+                self.load_data();
+            },
+            current_change:function(currentPage){
+                var self = this;
+                this.page = currentPage;
+
+                self.load_data();
+            },
+            load_data:function( a ){
+                var self = this;
+                for (var i =0; i <10; i++ ) {}
+
+                /// 提交参数
+                var formDataInfo = {
+                    page : self.page,
+                    pageNum : self.pageNum,
+                    sort : self.sort,
+                    listField : self.listField,
+                    searchDo : self.formInline.do,
+                    fields : self.formInline.fields,
+                    keywords : self.formInline.keywords,
+                };
+
+                /// 异步请求数据
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    data : formDataInfo,
+                    //url : "{php echo $this->createWeburl('wishingList', array('op'=>'content','state'=>'cj_admin_wishingWall'));}"+"&page="+self.page+"&pageNum="+self.pageNum+"&sort="+self.sort+"&listField="+self.listField,
+                    url : "{php echo $this->createWeburl('wishingList', array('op'=>'content','state'=>'cj_admin_wishingWall'));}",
+                    success : function(json) {
+                        /// 判断是否有返回数据
+                        if (json.data.length == 0) {
+                            alert("没有数据");
+                            return false;
+                        }
+                        self.tableData = json.data;
+                        self.total = json.total;
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+            },
+            auditorDo:function (select) {
+                var self = this;
+                // console.log(777777777);
+                // console.log(select);
+                if (select==2 || select==3) {
+                    self.refuseStatus = 1;
+                } else {
+                    self.refuseStatus = 0;
+                }
+                self.auditorSelect = select;
+            },
+            comfirmAudit:function () {
+                var self = this;
+
+                if (self.auditorSelect == 2 || self.auditorSelect == 3) {
+                    if (self.refuseReason == '') {
+                        alert("拒绝原因必须填写");
+                        return false;
+                    }
+                }
+
+                if (confirm("确认修改状态吗？")) {
+                    $.ajax({
+                        type : "POST",
+                        dataType : "json",
+                        data : {
+                            wishingId : self.auditorInfo.id,
+                            audit : self.auditorSelect,
+                            refuseReason : self.refuseReason,
+                        },
+                        url : "{php echo $this->createWeburl('auditDo', array('state'=>'cj_admin_wishingWall'));}",
+                        success : function(json) {
+                            self.auditorVisible = false;
+                            if (json.code == 10000) {
+                                if (self.auditorSelect==4) {
+                                    self.tableData.splice(self.auditorIndex, 1);
+                                } else {
+                                    Vue.set( self.tableData, self.auditorIndex, json.data );
+                                }
+                            } else {
+                                alert(json.msg);
+                            }
+                        },
+                        error : function(json) {
+                            alert("加载失败");
+                            self.auditorVisible = false;
+                        }
+                    });
+                }
+            },
+            handleRelease:function(index, row) {
+                if(row.likes_num<row.accomplish_wishing){
+                    if(confirm("未达到发布要求，确定发布商品吗?")){
+                        //点击确定后操作
+                        window.location.href="{php echo $this->createWeburl('choujiang_goods', array('op'=>'post'));}&wishingId="+row.id;
+                    }
+                } else {
+                    window.location.href="{php echo $this->createWeburl('choujiang_goods', array('op'=>'post'));}&wishingId="+row.id;
+                }
+
+            },
+            handleAudit:function(index, row) {
+                var self = this;
+                var is_set = 0;
+                for ( item in self.options) {
+                    if (self.options[item].value == row.status) {
+                        self.auditor = self.options[item].label;
+                        is_set = 1;
+                        break;
+                    }
+                }
+
+                if ( ! is_set ) {
+                    self.auditor = '';
+                }
+
+                if (row.status ==2 || row.status == 3) {
+                    self.refuseStatus = 1;
+                } else {
+                    self.refuseStatus = 0;
+                }
+
+                if (row.refuse_reason==''|| row.refuse_reason==null||row.refuse_reason=="null") {
+                    self.refuseReason = '';
+                } else {
+                    self.refuseReason = row.refuse_reason;
+                }
+                self.auditorInfo = row;
+                self.auditorIndex = index;
+                self.auditorVisible = true;
+
+            },
+            goodsDetails:function(index, row) {
+                window.location.href="{php echo $this->createWeburl('choujiang_goods', array('op'=>'post'));}&id="+row.goods_id;
+            },
+            handleDetails:function(index, row) {
+                var self = this;
+
+                self.editRow = index;
+                // self.form = row;
+                // self.dialogVisible = true;
+                $.ajax({
+                    type : "GET",
+                    dataType : "json",
+                    contentType : "application/json",
+                    url : "{php echo $this->createWeburl('details', array('state'=>'cj_admin_wishingWall'));}"+"&wishingId="+row.id,
+                    success : function(json) {
+                        self.form = json.data;
+                        self.dialogVisible = true;
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+
+            },
+            handleEdit:function(id) {
+                var self = this;
+
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    // data : JSON.stringify(data),
+                    data : this.form,
+                    contentType : "application/x-www-form-urlencoded",
+                    url : "{php echo $this->createWeburl('edit', array('state'=>'cj_admin_wishingWall'));}"+"&wishingId="+id,
+                    success : function(json) {
+                        if ( json.code == 10000 ) {
+                            Vue.set( self.tableData, self.editRow, self.form );
+                            self.dialogVisible = false;
+                            alert(json.data);
+                        } else {
+                            alert(json.data);
+                        }
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+
+            },
+
+
+            /// 想要表使用函数-----start
+            handleRecord:function(index, row) {
+                var self = this;
+                self.likeswishingId = row.id;
+                self.likesData = [];
+                self.likestotal = 0;
+                self.likespage = 1;
+                this.load_data_likes(row.id);
+            },
+            current_change_likes:function(currentPage){
+                this.likespage = currentPage;
+                this.load_data_likes(this.likeswishingId);
+            },
+            sort_change_likes:function(prop){
+                // this.listField = prop.prop;
+                if (prop.order == "descending" || prop.order==null) {
+                    this.likessort = 'desc';
+                } else {
+                    this.likessort = 'asc';
+                }
+
+                this.load_data_likes(this.likeswishingId);
+            },
+            load_data_likes:function( id ){
+                var self = this;
+
+                if( id == 0 || id == '' ){
+                    alert("心愿id必填");
+                    return ;
+                }
+
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    data : {
+                        page : self.likespage,
+                        pageNum : self.likespageNum,
+                        sort : self.likessort,
+                        id : id,
+                    },
+                    url : "{php echo $this->createWeburl('likesList', array('op'=>'content','state'=>'cj_admin_wishingWall'));}",
+                    success : function(json) {
+                        self.likesData = json.data;
+                        self.likestotal = json.total;
+                        self.likesListVisible = true;
+                    },
+                    error : function(json) {
+                        alert("加载失败");
+                    }
+                });
+            },
+            /// 想要表使用函数-----end
+        },
+        created: function(){
+            this.load_data();
+        }
+    });
+
+
+
+    function ShowElement(element) {
+        var inputName = element.getAttribute("data");
+
+        var oldhtml = element.innerHTML;
+        //创建新的input元素
+        var newobj = document.createElement('input');
+        //为新增元素添加类名
+        newobj.setAttribute('class','el-input__inner');
+        //为新增元素添加类型
+        newobj.type = 'text';
+        //为新增元素添加value值
+        newobj.value = oldhtml;
+        //为新增元素添加光标离开事件
+        newobj.onblur = function() {
+            //当触发时判断新增元素值是否为空，为空则不修改，并返回原有值
+            element.innerHTML = this.value == oldhtml ? oldhtml : this.value;
+
+            var varlnew = this.value == oldhtml ? oldhtml : this.value;
+
+            app.form[inputName] = varlnew;
+
+            //当触发时设置父节点的双击事件为ShowElement
+            element.setAttribute("ondblclick", "ShowElement(this);");
+        }
+        //设置该标签的子节点为空
+        element.innerHTML = '';
+        //添加该标签的子节点，input对象
+        element.appendChild(newobj);
+        //设置选择文本的内容或设置光标位置（两个参数：start,end；start为开始位置，end为结束位置；如果开始位置和结束位置相同则就是光标位置）
+        newobj.setSelectionRange(0, oldhtml.length);
+        //设置获得光标
+        newobj.focus();
+
+        //设置父节点的双击事件为空
+        newobj.parentNode.setAttribute("ondblclick", "");
+
+    }
+</script>
+
+{template 'common/footer'}

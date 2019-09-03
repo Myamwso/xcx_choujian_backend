@@ -1,0 +1,535 @@
+<link rel="stylesheet" href="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.css">
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/vue.js"></script>
+<script src="https://rw-byify-com.oss-cn-shanghai.aliyuncs.com/cj/js/vue/index.js"></script>
+{template 'common/header'}
+
+
+<style>
+    .cardbox{
+
+        position: relative;
+        /*background:red;*/
+    }
+    .dels{
+        position: absolute;
+        top:0px;
+        right:40%;
+    }
+
+    .toast{
+        width:100px;
+        height:40px;
+        background:transparent;
+        background:rgba(0,0,0,0.5);
+        border-radius:8px;
+        position: fixed;
+        margin:auto;left:0; right:0; top:0; bottom:0;
+        z-index: 999;
+        text-align: center;
+        line-height: 40px;
+        color: white;
+    }
+    .el-table td, .el-table th {
+        padding: 5px 0;
+    }
+</style>
+<div class=" toast" id="loading" style="display: none"><span>提交中...</span></div>
+
+<ul class="nav nav-tabs">
+    <li {if $op == 'stat'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_channel_code', array('op'=>'stat'));}">推广统计</a></li>
+    <li {if $op == 'content' || $op == 'post'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_channel_code', array('op'=>'content'));}">推广码</a></li>
+</ul>
+
+
+
+
+{if $op == 'stat'}
+
+<form id="seach_form" class="form-horizontal" action="{php echo $this->createWeburl('getChannelData', array('op'=>'post'));}" method="post" class="form1" style="width:100%;flex: 1;">
+    <div class="pull-left col-sm-8" style="padding:10px 0px 10px 0">
+        <div class="col-sm-3" style="width:25%;float:left;padding-right:0px;padding-left: 0px;">
+            <select name="select_date" class="form-control">
+                <option value="0" selected>今天</option>
+                <option value="1" >昨天</option>
+                <option value="2" >最近7天</option>
+                <option value="3" >最近30天</option>
+            </select>
+        </div>
+        <div class="col-sm-3" style="width:25%;float:left;padding-right:20px">
+            <select name="select_channel" class="form-control">
+                <option value="0" selected>推广名</option>
+                {loop $channels $item}
+                <option value="{$item['id']}" >{$item['title']}</option>
+                {/loop}
+            </select>
+        </div>
+        <div class="input-group" style="width:40%;">
+            <span class="input-group-btn">
+                 <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" class="btn btn-primary"> 搜索</span>
+            </span>
+        </div>
+    </div>
+
+    <div style="width:100%;">
+        <link rel="stylesheet" href="../addons/choujiang_page/resource/css/style.css">
+        <div id="SmoothChart" class="Chart"></div>
+        <script src='../addons/choujiang_page/resource/js/amcharts.js?1'></script>
+        <script src='../addons/choujiang_page/resource/js/serial.js?1'></script>
+        <script  src="../addons/choujiang_page/resource/js/index.js?201808"></script>
+    </div>
+
+    <div style="flaot:left;width:927px">
+        <!--<el-table @sort-change='sortChange' :data="tableData3" height="250" stripe border :default-sort = "{prop: 'sweep_user', order: 'descending'}">-->
+
+        <div id="app" style="text-align:center;">
+            <template>
+                <div style="text-align:left;">
+                    <el-button type="primary" @click="doFilter">刷新列表</el-button>
+                </div>
+                <el-table @sort-change='sortChange' :data="tableData" height="300" stripe border :default-sort = "{prop: 'field', order: 'order'}">
+                    <el-table-column prop="title" label="二维码名称"></el-table-column>
+                    <el-table-column width="300" prop="page_url" label="页面url"></el-table-column>
+                    <el-table-column sortable="custom" prop="sweep_user" label="扫码人数" :formatter="formatterNullToZero"></el-table-column>
+                    <el-table-column sortable="custom" prop="sweep_time" label="扫码次数" :formatter="formatterNullToZero"></el-table-column>
+                    <el-table-column sortable="custom" prop="sweep_add" label="扫码新增" :formatter="formatterNullToZero"></el-table-column>
+                    <el-table-column prop="create_at" label="日期" :formatter="formatterDateToMax"></el-table-column>
+                </el-table>
+            </template>
+            <div style="margin-top:15px;">
+                <el-pagination background @current-change="current_change" layout="prev, pager, next" :page-size="pagesize" :pager-count="11" :total="total"></el-pagination>
+            </div>
+        </div>
+
+    </div>
+
+</form>
+
+{/if}
+
+{if $op == 'content'}
+<div class="pull-right">
+    <a href="{php echo $this->createWeburl('choujiang_channel_code', array('op'=>'post'));}"  class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">添加推广码</a>
+</div>
+<form class="form-horizontal" action="" method="post" class="form1">
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <th style="width: 50px;"><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>
+            <td style="width: 50px;">ID</td>
+            <td>推广名</td>
+            <!--<td>推广标识</td>-->
+            <td>场景值</td>
+            <td>页面URL</td>
+            <td>尺寸</td>
+            <td>推广码</td>
+            <td>创建日期</td>
+            <td class="text-right">操作</td>
+        </tr>
+        {loop $products $item}
+        <tr>
+            <td><input type="checkbox" value="{$item['id']}" name="deleteall[]"></td>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                {$item['title']}
+            </td>
+            <td>
+                {$item['channel']}
+            </td>
+            <td>
+                {$item['page_url']}
+            </td>
+            <td>
+                {$item['size']}px
+            </td>
+            <td>
+                <img src="/attachment/choujiang_page/{$item['wx_code']}" width="100px" alt="">
+            </td>
+            <td>
+                {$item['create_at']}
+            </td>
+            <td class="text-right">
+                <a class="btn btn-default btn-sm" href="/attachment/choujiang_page/{$item['wx_code']}" download="code.jpg">下载推广码</a>
+                <a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('choujiang_channel_code', array('id' => $item['id'], 'op' =>'post'))}" >编辑</a>
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <table class="table">
+        <tr>
+            <td>
+                <input class="btn btn-primary" type="submit" value="删除" name="submit" style="height: 30px;">
+            </td>
+        </tr>
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+<script type="text/javascript">
+    $('.form1').submit(function(){
+        if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+            return confirm('删除后不可恢复，您确定删除吗？');
+        }
+        return false;
+    });
+    $('.onclick').click(function(){
+        $('#teshu').val(1);
+    })
+</script>
+{/if}
+
+<!-- 编辑新增 -->
+{if $op == 'post'}
+<form id="addForm" class="form-horizontal" action="{php echo $this->createWeburl('choujiang_channel_code', array('op'=>'post'));}" method="post">
+    {if $products}
+    <input type="hidden" name="edit" id="edit" value="edit" >
+    <input type="hidden" name="cid" id="cid" value="{$products['id']}" >
+    {/if}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">{if $products}编辑推广码{else}添加推广码{/if}</h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="" class="control-label col-sm-1">推广名</label>
+                <div class="form-controls col-sm-5" style="margin-left: 75px;">
+                    <input type="text" name="title" id="title" value="{$products['title']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block"></div>
+            </div>
+            <!--<div class="form-group">-->
+                <!--<label for="" class="control-label col-sm-1">推广标识</label>-->
+                <!--<div class="form-controls col-sm-5" style="margin-left: 75px;">-->
+                    <!--<input type="text" name="channel" id="channel" value="" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                <!--</div>-->
+                <!--<div class="col-sm-1"></div>-->
+                <!--<div class="form-controls col-sm-3 help-block">最大32个可见字符，只支持数字，大小写英文</div>-->
+            <!--</div>-->
+            <div class="form-group">
+                <label for="" class="control-label col-sm-1">页面URL</label>
+                <div class="form-controls col-sm-5" style="margin-left: 75px;">
+                    <select id="page_url" name="page_url" class="form-control">
+                        <option value="0">--请选择--</option>
+                        <option value="choujiang_page/index/index" {if $products['page_url'] == 'choujiang_page/index/index'}selected{/if} >主页</option>
+                        <option value="choujiang_page/fuli_xq/fuli_xq" {if $products['page_url'] == 'choujiang_page/fuli_xq/fuli_xq'}selected{/if}>奖品详情</option>
+                    </select>
+                    <!--<input type="text" name="page_url" id="page_url" value="" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                </div>
+                <!--<div class="col-sm-1"></div>-->
+                <!--<div class="form-controls col-sm-3 help-block">例如"pages/index/index" ,根路径前不要填加'/',不能携带参数</div>-->
+            </div>
+            <div class="form-group" id="goods_id_div" style="{if $products['page_url'] != 'choujiang_page/fuli_xq/fuli_xq'}display:none;{/if}">
+                <label for="" class="control-label col-sm-1">奖品ID</label>
+                <div class="form-controls col-sm-5" style="margin-left: 75px;">
+                    <input type="text" name="goods_id" id="goods_id" value="{$products['goods_id']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">奖品ID请点左边导航奖品管理查看</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-1">尺寸</label>
+                <div class="form-controls col-sm-5" style="margin-left: 75px;">
+                    <select id="size" name="size" class="form-control">
+                        <option value="0">--请选择--</option>
+                        <option value="1000" {if $products['size'] == '1000'}selected{/if} >1000px</option>
+                        <option value="600" {if $products['size'] == '600'}selected{/if}>600px</option>
+                        <option value="420" {if $products['size'] == '420'}selected{/if}>420px</option>
+                    </select>
+                    <!--<input type="text" name="size" id="size" value="{$products['size']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block"></div>
+    </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input name="token" type="hidden" value="{$_W['token']}" />
+            <span id="hideAddPost" class="btn btn-primary col-lg-1" style="left:40%;width: 200px;display: none">{if $products}保存编辑{else}保存并生成小程序码{/if}</span>
+            <span id="addPost" class="btn btn-primary col-lg-1" style="left:40%;width: 200px;">{if $products}保存编辑{else}保存并生成小程序码{/if}</span>
+        </div>
+    </div>
+</form>
+
+{/if}
+{template 'common/footer'}
+
+
+
+<script>
+    var Main = {
+        data:function () {
+            return {
+                tableData:[],
+                multipleSelection: [],
+                total: 0,
+                pagesize:10,
+                currentPage:1,
+                field:"sweep_user",
+                order:"descending",
+            }
+        },
+        methods:{
+            sortChange: function(column) {
+                this.getData(this.currentPage, this.pagesize, column.prop, column.order);
+            },
+            current_change:function(currentPage){
+                this.getData(currentPage, this.pagesize, this.field, this.order);
+            },
+            doFilter: function(){
+                this.getData(this.currentPage, this.pagesize, this.field, this.order, 1);
+            },
+            getData:function (page, pageSize, field, order, refresh) {
+                //console.log(refresh);
+                var reGet = 0;
+                if(refresh==undefined){
+                    //console.log(refresh);
+                    var hasNew = 0;
+                    if(page!=this.currentPage){
+                        hasNew = 1;
+                        this.currentPage = page;
+                    }
+                    if(pageSize!=this.pagesize){
+                        hasNew = 1;
+                    }
+                    if(field!=this.field && field!=null){
+                        hasNew = 1;
+                        this.field = field;
+                    }
+                    if(order!=this.order && order!=null){
+                        hasNew = 1;
+                        this.order = order;
+                    }
+                    if(hasNew){
+                        reGet = 1;
+                    }
+                }else{
+                    reGet = 1;
+                }
+
+                if(reGet){
+                    var postData = $('#seach_form').serialize()+"&page="+page+"&pageSize="+pageSize+"&field="+field+"&order="+order;
+                    $.post("{php echo $this->createWeburl('getChannelDataList', array('op'=>'post'));}",postData ,function (res) {
+                        var response = eval("(" + res + ")");
+                        // console.log(response);
+                        table1.tableData = response.date_list;
+                        table1.total = response.total;
+
+                    });
+                }
+            },
+            formatterNullToZero:function (row, column, cellValue){
+                if(cellValue == null) {
+                    return 0;
+                }else{
+                    return cellValue;
+                }
+            },
+            formatterDateToMax:function(row, column, cellValue){
+                if(row._create_at == null) {
+                    return cellValue;
+                }else{
+                    return row._create_at;
+                }
+            }
+        },
+    }
+    var Ctor = Vue.extend(Main);
+    var table1 = new Ctor().$mount('#app');
+
+</script>
+
+
+<script>
+
+    $("#addPost").click(function(){
+        var spanobj= $('#addPost');
+        var spanobjP=$('#hideAddPost');
+        if("choujiang_page/fuli_xq/fuli_xq" == $("#page_url")[0].value && ""==$("#goods_id").val()){
+            alert("奖品详情，ID不能为空");
+            return false;
+        }
+        spanobj.hide();
+        spanobjP.show();
+
+        $("#loading").css('display','block')
+        $.post($('#addPost').attr('action'),$('#addForm').serialize(),function (res) {
+            var response = eval("(" + res + ")");
+            $("#loading").css('display','none')
+            if(response.type=='success'){
+                alert(response.message);
+                location.href=response.redirect;
+            }else{
+                spanobj.show();
+                spanobjP.hide();
+                alert(response.message);
+            }
+        })
+    });
+    $("#page_url").change(function(){
+        // console.log($("#page_url")[0].value);
+        if("choujiang_page/fuli_xq/fuli_xq" == $("#page_url")[0].value){
+            $("#goods_id_div").show();
+        }else{
+            $("#goods_id_div").hide();
+        }
+    });
+
+    $("#submitForm").click(function(){
+        $("#loading").css('display','block');
+        getChannelData();
+        $("#loading").css('display','none');
+    });
+
+    function getChannelData(){
+        var graphs=[
+            {
+                "balloonColor": "#191919",
+                // "balloonText": "[[title]] of [[category]]:[[value]]",
+                "balloonText": "[[title]]:[[value]]",
+                "bullet": "round",
+                "bulletAlpha": 0,//圆形样式
+                "bulletBorderAlpha": 1,
+                "bulletBorderColor": "#1C95F3",
+                "bulletSize": 6,
+                "color": "#1c95f3",
+                "fillAlphas": ".47",
+                "fillColorsField": "lineColor",
+                "fixedColumnWidth": 0,
+                "gapPeriod": 0,
+                "id": "AmGraph-1",
+                "legendValueText": "[[value]]",
+                "lineAlpha": 0,
+                "lineColor": "#1c95f3",
+                "lineColorField": "lineColor",
+                "title": "扫码人数",
+                "type": "smoothedLine",
+                "valueField": "visit"
+            },
+            {
+                "balloonColor": "#191919",
+                "balloonText": "[[title]]:[[value]]",
+                "bullet": "square",
+                "fillAlphas": ".47",
+                "fillColorsField": "lineColor",
+                "gapPeriod": 0,
+                "id": "AmGraph-2",
+                "legendValueText": "[[value]]",
+                "lineAlpha": 0,
+                "lineColor": "#5c389f",
+                "lineColorField": "lineColor",
+                "title": "扫描次数",
+                "type": "smoothedLine",
+                "valueField": "scan"
+            },
+            {
+                "balloonColor": "#191919",
+                "balloonText": "[[title]]:[[value]]",
+                "bullet": "round",
+                "fillAlphas": ".47",
+                "fillColorsField": "lineColor",
+                "gapPeriod": 0,
+                "id": "AmGraph-3",
+                "legendValueText": "[[value]]",
+                "lineAlpha": 0,
+                "lineColor": "#00d856",
+                "lineColorField": "lineColor",
+                "title": "新增人数",
+                "type": "smoothedLine",
+                "valueAxis": "ValueAxis-1",
+                "valueField": "new"
+            }
+        ];
+
+        var valueAxis= new AmCharts.ValueAxis();
+        valueAxis.axisColor = "#4B4F5E";//轴的颜色
+        valueAxis.axisThickness = 1;//轴的宽度
+        valueAxis.gridAlpha = 0.2;//轴的透明度，值介于0-1之间，0全透明
+        valueAxis.tickLength =0;//轴从下到上像左或右伸出来的延长线
+        valueAxis.minimum = 0;//轴的最小值，如果不设置那么最小值根据数据动态变化
+        //valueAxis.maximum = 5;//轴的最大值，如果不设置那么最大值根据数据动态变化
+        // valueAxis.title="哈哈";//轴的名称
+        valueAxis.logarithmic = false;//是否为对数函数分布，一般轴的刻度是均匀划分的，当该属性设置为true的时候，刻度分布呈对数形式分布
+        valueAxis.integersOnly = true;//是否只显示整数，如果为true轴的刻度只显示整数形式
+        valueAxis.gridCount = 10;//最大刻度个数
+        // valueAxis.unit = "%";//单位
+        valueAxis.labelsEnabled = true;//是否显示轴标签，默认值为true
+        valueAxis.inside = false;//轴的刻度值显示在表里面还是外面
+        // valueAxis.position = "left";//轴的位置，默认在左侧
+        // valueAxis.stackType = "0%";
+
+        var postData  = $('#seach_form').serialize()+"&page="+table1.currentPage+"&pageSize="+table1.pagesize+""+"&field="+table1.field+"&order="+table1.order;
+        $.post($('#seach_form').attr('action'), postData,function (res) {
+            var response = eval("(" + res + ")");
+            // console.log(response);
+            // console.log(response.date_list);
+
+            table1.tableData = response.date_list;
+            table1.total = response.total;
+
+            // var trHtml = '<tr><td>二维码名称</td><td>页面url</td> <td>扫码人数</td><td>扫码次数</td> <td>扫码新增</td> <td>日期</td></tr>';
+            // if(response.date_list.length>0){
+            //     for(var i =0; i<response.date_list.length; i++){
+            //         trHtml += "<tr>";
+            //         trHtml += "<td>"+response.date_list[i]['title']+"</td>";
+            //         trHtml += "<td>"+response.date_list[i]['page_url']+"</td>";
+            //         trHtml += "<td>"+response.date_list[i]['sweep_time']+"</td>";
+            //         trHtml += "<td>"+response.date_list[i]['sweep_user']+"</td>";
+            //         trHtml += "<td>"+response.date_list[i]['sweep_add']+"</td>";
+            //         trHtml += "<td>"+response.date_list[i]['create_at']+"</td>";
+            //         trHtml += "</tr>";
+            //     }
+            // }
+            // // $("#data_list").append(trHtml);
+            // $("#data_list").html(trHtml);
+
+
+            if(!response){
+                valueAxis.maximum = 5;//轴的最大值，如果不设置那么最大值根据数据动态变化
+            }
+            initConfig.graphs = graphs;
+            initConfig.dataProvider = response.channelAmount;
+            initConfig.chartScrollbar={
+                "enabled": true,
+                "autoGridCount": true,
+                "GridCount": 5,
+                "backgroundAlpha": 0,
+                "color": "#888888",
+                "graph": "g1",
+                "graphFillAlpha": 0,
+                "graphLineAlpha": 0,
+                "graphLineColor": "#c2c2c2",
+                "graphType": "smoothedLine",
+                "gridAlpha": 0.7,
+                "scrollbarHeight": 50,
+                "selectedBackgroundAlpha": 0.1,
+                "selectedBackgroundColor": "#888888",
+                "selectedGraphFillAlpha": 0,
+                "selectedGraphLineAlpha": 1,
+            };
+            var chart = AmCharts.makeChart("SmoothChart", initConfig);
+            chart.addValueAxis(valueAxis);
+            chart.addListener("rendered", zoomChart);
+            if(chart.zoomChart){
+                chart.zoomChart();
+            }
+
+            function zoomChart(){
+                chart.zoomToIndexes(Math.round(chart.dataProvider.length * 0.0), Math.round(chart.dataProvider.length * 1.0));
+            }
+
+        })
+
+    }
+
+    {if $op == 'stat'}
+    getChannelData();
+    {/if}
+
+
+</script>
+
+

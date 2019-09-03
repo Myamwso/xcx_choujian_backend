@@ -1,0 +1,141 @@
+{template 'common/header'}
+{if $op == 'content'}
+<style>
+    .actives{
+        background:#428BCA;
+        color:#FFF;
+    }
+</style>
+<form class="form-horizontal" action="" method="post" class="form1">
+
+    <div class="pull-right col-sm-6"  style="margin-bottom:20px">
+        <div class="input-group" style="width:100%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入用户名进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                <!--<button class="btn btn-primary" type="submit"> 搜索</button>-->
+                        <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" class="btn btn-primary"> 搜索</span>
+            </span>
+        </div>
+    </div>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <th style="width: 50px;"><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>
+            <td style="width: 100px;">ID</td>
+            <td>用户</td>
+            <td>申请金额</td>
+            <td>手续费</td>
+            <td>提现金额</td>
+            <td>提现状态</td>
+            <td>申请时间</td>
+            <td class="text-right">操作</td>
+        </tr>
+        {loop $products $item}
+        <tr class="father">
+            <td><input type="checkbox" value="{$item['id']}" name="deleteall[]"></td>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                <img src="{media $item['avatar']}" style="width:20px;height:20px" alt="">{$item['nickname']}
+            </td>
+            <td>
+                {$item['total']}元
+            </td>
+            <td>
+                {$item['poundage']}元
+            </td>
+            <td>
+                {$item['money']}元
+            </td>
+            <td class="status_name">
+                {$item['status_name']}
+            </td>
+            <td>
+                {$item['create_time']}
+            </td>
+            <td class="text-right">
+                {if $item['status'] == 0}
+                    <!-- <div class="txjj"> -->
+                       <!--  <a style="cursor:pointer;" data="{$item['id']}" class="btn btn-default btn-sm {if $item['status']=='1'}actives{/if}" onclick="setItemStatus(this,'yes')">提现</a>
+                        <a style="cursor:pointer;" data="{$item['id']}" class="btn btn-default btn-sm {if $item['status']=='-1'}actives{/if}" onclick="setItemStatus(this,'no')">拒绝</a> -->
+                        
+                        
+                        <a class="btn btn-default btn-sm" onclick="return confirm('此操作不可恢复，确认吗？'); return false;" href="{php echo $this->createWeburl('Choujiang_withdrawal',array('op'=>'yes','id'=>$item['id']))}" >提现</a>
+                        <a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('Choujiang_withdrawal',array('op'=>'no','id'=>$item['id']))}" >拒绝</a>
+
+                    <!-- </div> -->
+                   
+                {else}
+                    <a class="btn btn-default btn-sm" href="#" >已结束</a>
+                {/if}
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+<script type="text/javascript">
+    // function setItemStatus(obj,op){
+    //     var id=$(obj).attr('data');
+    //     if(op=='yes'){
+    //         $.ajax({
+    //             type: 'post',
+    //             dataType: 'json',
+    //             url: "{php echo $this->createWebUrl('choujiang_withdrawal',array('op' =>'yes'))}",
+    //             data: {id: id},
+    //             success:function(result){
+    //                 if(result.data==1){
+    //                     $(obj).addClass('actives');
+    //                     // $(this).siblings().find('.status_name').html('已提现');
+    //                     // $(this).siblings('.yjs').show();
+    //                     $(this).parent().hide();
+    //                     $(this).parents('.father').find('.status_name').html('已提现');
+    //                     $(this).parent().find('.yjs').show();
+    //                 }else{
+    //                     $(obj).removeClass('actives');
+    //                 }
+    //             }
+    //         });
+    //     }else if(op=='no'){
+    //         $.ajax({
+    //             type: 'post',
+    //             dataType: 'json',
+    //             url: "{php echo $this->createWebUrl('choujiang_withdrawal',array('op' =>'no'))}",
+    //             data: {id: id},
+    //             success:function(result){
+    //                 if(result.data==1){
+    //                     $(obj).addClass('actives');
+    //                     $('.status_name').html('已拒绝');
+    //                 }else{
+    //                     $(obj).removeClass('actives');
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
+</script>
+{/if}
+<script>
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.form-horizontal').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    $('.pagination li').each(function(e){
+        var href = $('.pagination li').eq(e).find('a').attr('href');
+        $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+        $('.pagination li').eq(e).find('a').attr('data-href', href);
+    });
+    $('.pagination li a').click(function(){
+        var href = $(this).attr('data-href');
+        $('.form-horizontal').prop('action', href);
+        $("button[type='submit']").click();
+    });
+    ///分页处理 - end
+</script>
+{template 'common/footer'}
+
+

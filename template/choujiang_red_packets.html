@@ -1,0 +1,1654 @@
+
+
+{template 'common/header'}
+<script>
+    var stroge=window.localStorage;
+    stroge.getItem('formData');
+
+</script>
+<style>
+    .cardbox{
+
+        position: relative;
+        /*background:red;*/
+    }
+   .dels{
+    position: absolute;
+    top:0px;
+    right:40%;
+   }
+
+    .toast{
+        width:100px;
+        height:40px;
+        background:transparent;
+        background:rgba(0,0,0,0.5);
+        border-radius:8px;
+        position: fixed;
+        margin:auto;left:0; right:0; top:0; bottom:0;
+        z-index: 999;
+        text-align: center;
+        line-height: 40px;
+        color: white;
+    }
+    .multi-img-details .multi-item {
+        height: auto;
+    }
+</style>
+<div class=" toast" id="loading" style="display: none"><span>提交中...</span></div>
+{if $redDate == '0'}
+<div class="" style="{if $uniacid!=11}display:none;{/if}margin-bottom: 5px;width: 100px;height: 40px;background: rgba(0,0,0,0.5);border-radius: 8px;text-align: center;line-height: 40px;color: white;"><a href="{php echo $this->createWeburl('choujiang_red_packets', array('redDate'=>'1','op'=>'content'));}">切换旧数据</a></div>
+{else}
+<div class="" style="{if $uniacid!=11}display:none;{/if}margin-bottom: 5px;width: 100px;height: 40px;background: rgba(0,0,0,0.5);border-radius: 8px;text-align: center;line-height: 40px;color: white;"><a href="{php echo $this->createWeburl('choujiang_red_packets', array('op'=>'content'));}">切换新数据</a></div>
+{/if}
+
+{if $redDate == '0'}
+
+
+<ul class="nav nav-tabs">
+    <li {if $op == 'content' || $op == 'detail'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_red_packets', array('op'=>'content'));}">分享</a></li>
+    <li {if $op == 'newContent'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_red_packets', array('op'=>'newContent'));}">新用户</a></li>
+    <li {if $op == 'allRecord'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_red_packets', array('op'=>'allRecord'));}">提现列表</a></li>
+    <li {if $op == 'repeatList'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_red_packets', array('op'=>'repeatList'));}">补发列表</a></li>
+    <li {if $op == 'CashStat'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_red_packets', array('op'=>'CashStat'));}">提现统计</a></li>
+</ul>
+
+{if $op == 'content'}
+<form class="form-horizontal search" action="" method="post" class="form1">
+
+    <div class="pull-right col-sm-9" style="padding-bottom: 10px">
+        <input type="hidden" id="status" value="{$condition}" />
+        <div class="col-sm-2" style="width:22%;float:left;padding:0px;margin:0 1% 0 1%">
+            <select name="sort" id="sort" class="form-control">
+                <option value="0">--排序--</option>
+                <option value="1" {if $sort==1} selected{/if}>红包总额升序</option>
+                <option value="2" {if $sort==2} selected{/if}>红包总额降序</option>
+                <option value="3" {if $sort==3} selected{/if}>支付金额升序</option>
+                <option value="4" {if $sort==4} selected{/if}>支付金额降序</option>
+            </select>
+        </div>
+        <div class="col-sm-3" style="width:22%;float:left;padding:0px;margin:0 1% 0 1%">
+             <select name="field" id="field" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="1" {if $field==1} selected{/if}>openid</option>
+                <option value="2" {if $field==2} selected{/if}>用户名</option>
+            </select>
+        </div>
+        <div class="input-group" style="width:50%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入奖品名称进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" data-val="" class="btn btn-primary" > 搜索</span>
+            </span>
+        </div>
+    </div>
+
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+            <th>ID</th>
+            <th>用户</th>
+            <th>红包总额</th>
+            <th>已支付金额</th>
+            <th>操作</th>
+        </tr>
+        {loop $packetsList $item}
+        <tr>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['uid'], 'op' =>'detail'))}"><img style="width: 70px;height: 70px" src="{$item['avatar']}">{$item['nickname']}</a>
+            </td>
+            <td>
+                {$item['total_money']}
+            </td>
+            <td>
+                {$item['pay_money']}
+            </td>
+            <td class="text-left">
+                <a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('choujiang_red_packets', array('openid' => $item['openid'], 'op' =>'detail'))}" >查看领取记录</a>
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+<script type="text/javascript">
+    $('.form1').submit(function(){
+        if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+            return confirm('删除后不可恢复，您确定删除吗？');
+        }
+        return false;
+    });
+
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.search').prop('action', '');
+        $("button[type='submit']").click();
+    });
+
+    var status=$("#status").val();
+    if(status){
+        $('.pagination li').each(function(e){
+            var href = $('.pagination li').eq(e).find('a').attr('href');
+            $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+            $('.pagination li').eq(e).find('a').attr('data-href', href);
+        });
+        $('.pagination li a').click(function(){
+            var href = $(this).attr('data-href');
+            $('.form-horizontal').prop('action', href);
+            $("button[type='submit']").click();
+        });
+    }
+
+    ///分页处理 - end
+</script>
+{/if}
+
+
+{if $op == 'newContent'}
+<form class="form-horizontal search" action="" method="post" class="form1">
+
+    <div class="pull-right col-sm-8" style="padding-bottom: 10px">
+        <input type="hidden" id="status" value="{$condition}" />
+        <div class="col-sm-3" style="width:25%;float:left;padding:0px;margin:0 3% 0 3%">
+            <select name="field" id="field" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="1" {if $field==1} selected{/if}>openid</option>
+                <option value="2" {if $field==2} selected{/if}>用户名</option>
+            </select>
+        </div>
+        <div class="input-group" style="width:69%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入奖品名称进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" data-val="" class="btn btn-primary" > 搜索</span>
+            </span>
+        </div>
+    </div>
+
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+            <th>ID</th>
+            <th>用户</th>
+            <th>红包总额</th>
+            <th>已支付金额</th>
+            <!--<th>操作</th>-->
+        </tr>
+        {loop $packetsList $item}
+        <tr>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['uid'], 'op' =>'detail'))}"><img style="width: 70px;height: 70px" src="{$item['avatar']}">{$item['nickname']}</a>
+            </td>
+            <td>
+                {$item['total_money']}
+            </td>
+            <td>
+                {$item['pay_money']}
+            </td>
+            <!--<td class="text-left">-->
+                <!--<a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('choujiang_red_packets', array('openid' => $item['openid'], 'op' =>'detail'))}" >查看领取记录</a>-->
+            <!--</td>-->
+        </tr>
+        {/loop}
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+<script type="text/javascript">
+    $('.form1').submit(function(){
+        if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+            return confirm('删除后不可恢复，您确定删除吗？');
+        }
+        return false;
+    });
+
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.search').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    var status=$("#status").val();
+    if(status){
+        $('.pagination li').each(function(e){
+            var href = $('.pagination li').eq(e).find('a').attr('href');
+            $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+            $('.pagination li').eq(e).find('a').attr('data-href', href);
+        });
+        $('.pagination li a').click(function(){
+            var href = $(this).attr('data-href');
+            $('.form-horizontal').prop('action', href);
+            $("button[type='submit']").click();
+        });
+    }
+
+    ///分页处理 - end
+</script>
+{/if}
+
+
+
+
+{if $op == 'allRecord'}
+<form class="form-horizontal search" action="" method="post" class="form1">
+
+    <div class="pull-right col-sm-9" style="padding-bottom: 10px">
+        <input type="hidden" id="status" value="{$condition}" />
+        <div class="col-sm-3" style="width:20%;float:left;padding:0px;margin:0 0 0 3%">
+            <select name="types" id="types" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="1" {if $types==1} selected{/if}>新用户</option>
+                <option value="2" {if $types==2} selected{/if}>分享用户</option>
+                <option value="3" {if $types==3} selected{/if}>支付成功</option>
+                <option value="4" {if $types==4} selected{/if}>支付失败</option>
+            </select>
+        </div>
+        <div class="col-sm-3" style="width:20%;float:left;padding:0px;margin:0 3% 0 3%">
+            <select name="field" id="field" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="1" {if $field==1} selected{/if}>openid</option>
+                <option value="2" {if $field==2} selected{/if}>用户名</option>
+                <option value="3" {if $field==3} selected{/if}>订单号</option>
+            </select>
+        </div>
+        <div class="input-group" style="width:49%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入奖品名称进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" data-val="" class="btn btn-primary" > 搜索</span>
+            </span>
+        </div>
+    </div>
+
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+            <th style="width: 80px;">ID</th>
+            <th >用户/openid</th>
+            <th >订单号/微信单号</th>
+            <th style="width: 150px;">领取/余额/总额</th>
+            <th style="width: 60px;">支付类型</th>
+            <th style="width: 60px;">支付状态</th>
+            <th style="width: 108px;">领取时间</th>
+            <th style="width: 80px;">补发</th>
+            <th style="width: 80px;">操作</th>
+        </tr>
+        {loop $packetsList $item}
+        <tr>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['uid'], 'op' =>'detail'))}"><img style="width: 60px;height: 60px" src="{$item['avatar']}">{$item['nickname']}</a>/{$item['openid']}
+            </td>
+            <td>
+                {$item['out_trade_no']}{loop $item['extact'] $key $val}{if $key=='payment_no'} / {$val}{/if}{/loop}
+            </td>
+            <td>
+                {$item['receive_money']}/{$item['balance']}/{$item['all_balance']}
+            </td>
+            <td>
+                {if $item['pay_types']==1}
+                用户红包
+                {else}
+                分享红包
+                {/if}
+            </td>
+            <td class="paied">
+                {if $item['pay_status']==1 && $item['extact']==''}
+                待确定红包，未收到微信返回数据。
+                {elseif $item['pay_status']==1}
+                支付成功
+                {else}
+                支付失败
+                {/if}
+            </td>
+            <td>
+                {$item['create_at']}
+            </td>
+            <td class="isReissue">
+                {if $item['new_id']>0}
+                <a class="btn btn-default btn-sm" onclick="reissueInfo({$item['id']})">详情</a>
+                {/if}
+            </td>
+            <td class="operation">
+                {if !($item['pay_status']==1 && $item['extact']!='') && !($item['new_id']>0) && $item['wechat_blacklist']==0}
+                <!--<a class="btn btn-default btn-sm stickcancel" id="{$item['id']}">修改状态</a>-->
+                <!--<a class="btn btn-default btn-sm stickcancel" id="{$item['id']}">补发红包</a>-->
+                <a class="btn btn-default btn-sm redRestatus" onclick="reStatus({$item['id']})">修改</a>
+                <a class="btn btn-default btn-sm redReissue" onclick="reissue({$item['id']},{$item['receive_money']})">补发</a>
+                {/if}
+                <a class="btn btn-default btn-sm" onclick="recordInfo({$item['id']})">详情</a>
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+    <!--自定义弹出层HTML start-->
+    <input type="hidden" value="0" id="Infos">
+    <div id="light" style="display:none;width:100%;height:100%;z-index: 999;position: fixed;top:0;left:0;background:rgba(0,0,0,0.59);">
+        <div id="showlight" style="width:520px;height:460px;z-index: 9999;position: absolute;top:50%;left:50%;margin-left:-260px;margin-top:-230px;background:#fff;border:1px solid #ccc;border-radius:7px;box-shadow:1 -1 5px #ccc;">
+            <p id="alertTitle" style="margin-top:15px; font-size:20px; font-weight:bold;text-align:center; ">支付回复详细信息</p>
+            <hr style="background-color:#ccc;height:1px;margin:10px 0px;">
+            <p id="alertContents" style="padding:10px 15px;font-size:16px;word-wrap:break-word;"></p>
+            <p id="hideWin" style="border:1px solid #ccc;padding:8px 20px;display:block;position: absolute;top:100%;left:50%;margin-left:-30px;margin-top:-50px;cursor: pointer;">关闭</p>
+        </div>
+    </div>
+    <div id="fade"></div>
+    <!--自定义弹出层HTML end-->
+</form>
+<script type="text/javascript">
+    // $('.form2').submit(function(){
+    //     if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+    //         return confirm('删除后不可恢复，您确定删除吗？');
+    //     }
+    //     return false;
+    // });
+
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.search').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    $('#types').change(function(){
+        $('.search').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    var status=$("#status").val();
+    if(status){
+        $('.pagination li').each(function(e){
+            var href = $('.pagination li').eq(e).find('a').attr('href');
+            $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+            $('.pagination li').eq(e).find('a').attr('data-href', href);
+        });
+        $('.pagination li a').click(function(){
+            var href = $(this).attr('data-href');
+            $('.form-horizontal').prop('action', href);
+            $("button[type='submit']").click();
+        });
+    }
+
+    ///分页处理 - end
+
+
+
+
+    var clickLock = false;
+
+    function reStatus(t){
+        if(clickLock){
+            return false;
+        }
+        // console.log(777777777);
+        clickLock = true;
+
+        if(confirm('此操作不可恢复，确认修改红包支付状态吗？')){
+            var data = {
+                id: t,
+                op: 'restatus'
+            };
+            $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+                var response = eval("(" + res + ")");
+                clickLock = false;
+                if(response.error==1){
+                    alert(response.message);
+                }else{
+                    var tdClass = "#tr" + t + " .paied";
+                    var tdClassOperation = "#tr" + t + " .operation";
+                    $(tdClass).html("支付成功");
+                    $(tdClassOperation).html('<a class="btn btn-default btn-sm" onclick="recordInfo({'+t+'})">详情</a>');
+                }
+                clickLock = false;
+            })
+        }else{
+            clickLock = false;
+        }
+
+    }
+    function reissue(t,p){
+        if(clickLock){
+            return false;
+        }
+        //console.log(777777777);
+        clickLock = true;
+        if(confirm('此操作不可恢复，确认补发' + p + '元红包给用户吗？')){
+            var data = {
+                id: t,
+                op: 'reissue'
+            };
+            $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+
+                var response = eval("(" + res + ")");
+                if(response.error==1){
+                    alert(response.message);
+                }else{
+                    var tdClass = "#tr" + t + " .paied";
+                    var tdClassOperation = "#tr" + t + " .operation";
+                    var tdClassReissue = "#tr" + t + " .isReissue";
+                    $(tdClass).html("支付成功");
+                    $(tdClassOperation).html('<a class="btn btn-default btn-sm" onclick="recordInfo('+t+')">详情</a>');
+                    $(tdClassReissue).html('<a class="btn btn-default btn-sm" onclick="reissueInfo('+t+')">详情</a>');
+                }
+                clickLock = false;
+            })
+        }else{
+            clickLock = false;
+        }
+    }
+
+
+    function recordInfo(t){
+        if(clickLock){
+            return false;
+        }
+        //console.log(777777777);
+        clickLock = true;
+        var data = {
+            id: t,
+            op: 'info'
+        };
+        $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+            var response = eval("(" + res + ")");
+            clickLock = false;
+            if(response.error==1){
+                alert(response.message);
+            }else{
+                //自定义弹出内容
+                var pHtml = '';
+                for (var property in response.message){
+                    pHtml += property + ':' + response.message[property] + "<br>";
+                }
+                $("#alertTitle").html('支付回复详细信息');
+                $("#alertContents").html(pHtml);
+                $("#light").fadeIn();
+                $("#showlight").slideDown();
+                $("#fade").fadeIn();
+            }
+            clickLock = false;
+        })
+
+    }
+    function reissueInfo(t){
+        if(clickLock){
+            return false;
+        }
+        //console.log(777777777);
+        clickLock = true;
+        var data = {
+            id: t,
+            op: 'reissueInfo'
+        };
+        $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+            var response = eval("(" + res + ")");
+            clickLock = false;
+            if(response.error==1){
+                alert(response.message);
+            }else{
+                //自定义弹出内容
+                var pHtml = '';
+                var InfoStr = {
+                    id: "id",
+                    openid: "openid",
+                    receive_money: "领取",
+                    all_balance: "总额",
+                    balance: "余额",
+                    out_trade_no: "单号",
+                    old_out_trade_no: "原单号",
+                    pay_types: "类型",
+                    pay_status: "状态",
+                    extact: "回执",
+                    operator: "补发人员",
+                    create_at: "领取时间",
+                    update_at: "更新时间",
+                };
+                for (var property in response.message){
+                    if(property=="extact"){
+                        pHtml += InfoStr[property] + ':';
+                        for (var ex_key in response.message[property]){
+                            pHtml += ex_key + '-' + response.message[property][ex_key] + ";";
+                        }
+                        pHtml += "<br>";
+                    }else{
+                        pHtml += InfoStr[property] + ':' + response.message[property];
+                        if(property=="openid" || property=="balance" || property=="out_trade_no" || property=="old_out_trade_no" || property=="pay_status" || property=="extact" || property=="create_at" || property=="update_at"){
+                            pHtml += "<br>";
+                        }else{
+                            pHtml += " | ";
+                        }
+                    }
+                }
+                $("#alertTitle").html('补发详细信息');
+                $("#alertContents").html(pHtml);
+                $("#light").fadeIn();
+                $("#showlight").slideDown();
+                $("#fade").fadeIn();
+            }
+            clickLock = false;
+        })
+
+    }
+    $(document).ready(function () {
+        //关闭按钮
+        $("#hideWin").click(function(){
+            $("#light").fadeOut();
+            $("#showlight").slideUp();
+            $("#fade").fadeOut();
+        });
+        //灰色部分也可以关闭
+        $("#light").click(function(){
+            $("#light").fadeOut();
+            $("#showlight").slideUp();
+            $("#fade").fadeOut();
+        });
+        //阻止时间冒泡
+        $("#showlight").click(function(event) {
+            return false;
+        });
+    });
+</script>
+{/if}
+
+
+{if $op == 'repeatList'}
+<form class="form-horizontal search" action="" method="post" class="form1">
+
+    <div class="pull-right col-sm-9" style="padding-bottom: 10px">
+        <input type="hidden" id="status" value="{$condition}" />
+        <div class="col-sm-3" style="width:20%;float:left;padding:0px;margin:0 0 0 3%">
+            <select name="types" id="types" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="1" {if $types==1} selected{/if}>新用户</option>
+                <option value="2" {if $types==2} selected{/if}>分享用户</option>
+                <option value="3" {if $types==3} selected{/if}>支付成功</option>
+                <option value="4" {if $types==4} selected{/if}>支付失败</option>
+            </select>
+        </div>
+        <div class="col-sm-3" style="width:20%;float:left;padding:0px;margin:0 3% 0 3%">
+            <select name="field" id="field" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="1" {if $field==1} selected{/if}>openid</option>
+                <option value="2" {if $field==2} selected{/if}>用户名</option>
+            </select>
+        </div>
+        <div class="input-group" style="width:49%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入奖品名称进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" data-val="" class="btn btn-primary" > 搜索</span>
+            </span>
+        </div>
+    </div>
+
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+            <th style="width: 80px;">ID</th>
+            <th >用户/openid</th>
+            <th >订单号/微信单号</th>
+            <th style="width: 150px;">领取/余额/总额</th>
+            <th style="width: 60px;">支付类型</th>
+            <th style="width: 60px;">支付状态</th>
+            <th style="width: 108px;">领取时间</th>
+            <!--<th style="width: 80px;">补发</th>-->
+            <!--<th style="width: 80px;">操作</th>-->
+        </tr>
+        {loop $packetsList $item}
+        <tr>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['uid'], 'op' =>'detail'))}"><img style="width: 60px;height: 60px" src="{$item['avatar']}">{$item['nickname']}</a>/{$item['openid']}
+            </td>
+            <td>
+                {$item['out_trade_no']}{loop $item['extact'] $key $val}{if $key=='payment_no'} / {$val}{/if}{/loop}
+            </td>
+            <td>
+                {$item['receive_money']}/{$item['balance']}/{$item['all_balance']}
+            </td>
+            <td>
+                {if $item['pay_types']==1}
+                用户红包
+                {else}
+                分享红包
+                {/if}
+            </td>
+            <td class="paied">
+                {if $item['pay_status']==1 && $item['extact']==''}
+                待确定红包，未收到微信返回数据。
+                {elseif $item['pay_status']==1}
+                支付成功
+                {else}
+                支付失败
+                {/if}
+            </td>
+            <td>
+                {$item['create_at']}
+            </td>
+            <!--<td class="isReissue">
+                {if $item['new_id']>0}
+                <a class="btn btn-default btn-sm" onclick="reissueInfo({$item['id']})">详情</a>
+                {/if}
+            </td>-->
+
+        </tr>
+        {/loop}
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+    <!--自定义弹出层HTML start-->
+    <input type="hidden" value="0" id="Infos">
+    <div id="light" style="display:none;width:100%;height:100%;z-index: 999;position: fixed;top:0;left:0;background:rgba(0,0,0,0.59);">
+        <div id="showlight" style="width:520px;height:460px;z-index: 9999;position: absolute;top:50%;left:50%;margin-left:-260px;margin-top:-230px;background:#fff;border:1px solid #ccc;border-radius:7px;box-shadow:1 -1 5px #ccc;">
+            <p id="alertTitle" style="margin-top:15px; font-size:20px; font-weight:bold;text-align:center; ">支付回复详细信息</p>
+            <hr style="background-color:#ccc;height:1px;margin:10px 0px;">
+            <p id="alertContents" style="padding:10px 15px;font-size:16px;word-wrap:break-word;"></p>
+            <p id="hideWin" style="border:1px solid #ccc;padding:8px 20px;display:block;position: absolute;top:100%;left:50%;margin-left:-30px;margin-top:-50px;cursor: pointer;">关闭</p>
+        </div>
+    </div>
+    <div id="fade"></div>
+    <!--自定义弹出层HTML end-->
+</form>
+<script type="text/javascript">
+    // $('.form2').submit(function(){
+    //     if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+    //         return confirm('删除后不可恢复，您确定删除吗？');
+    //     }
+    //     return false;
+    // });
+
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.search').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    $('#types').change(function(){
+        $('.search').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    var status=$("#status").val();
+    if(status){
+        $('.pagination li').each(function(e){
+            var href = $('.pagination li').eq(e).find('a').attr('href');
+            $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+            $('.pagination li').eq(e).find('a').attr('data-href', href);
+        });
+        $('.pagination li a').click(function(){
+            var href = $(this).attr('data-href');
+            $('.form-horizontal').prop('action', href);
+            $("button[type='submit']").click();
+        });
+    }
+
+    ///分页处理 - end
+
+</script>
+{/if}
+
+
+
+{if $op == 'CashStat'}
+<form class="form-horizontal" class="form-horizontal" action="" method="post">
+    <style>
+        .mt{margin-top:2%;}
+    </style>
+    <input type="hidden" name="submit" value="1">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">今日提现统计 </h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">成功提现金额:</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt"><?php echo $todaySuccessMoney['total']?$todaySuccessMoney['total']:0; ?></p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">提现失败金额:</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt"><?php echo $todayFailMoney['total']?$todayFailMoney['total']:0; ?></p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+        </div>
+    </div>
+</form>
+{/if}
+
+
+<!-- 详情 -->
+{if $op == 'detail'}
+
+<!--<div class="pull-left">-->
+    <!--<a href="{php echo $this->createWeburl('choujiang_red_packets', array('openid' => $item['openid'], 'op' =>'content'))}" class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">返回</a>-->
+<!--</div>-->
+<br/>
+<br/>
+<table class="table we7-table table-hover article-list vertical-middle">
+    <tr>
+        <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+        <th style="/*width: 50px;*/">ID</th>
+        <th style="width: 150px;">订单号</th>
+        <th>领取</th>
+        <th >余额</th>
+        <th >总额</th>
+        <th >支付类型</th>
+        <th >支付状态</th>
+        <th style="width: 108px;">领取时间</th>
+        <th >补发</th>
+        <th >操作</th>
+    </tr>
+    {loop $record $item}
+    <tr id="tr{$item['id']}">
+        <td>
+            {$item['id']}
+        </td>
+        <td>
+            {$item['out_trade_no']}
+        </td>
+        <td>
+            {$item['receive_money']}
+        </td>
+        <td>
+            {$item['balance']}
+        </td>
+        <td>
+            {$item['all_balance']}
+        </td>
+        <td>
+            {if $item['pay_types']==1}
+            新用户红包
+            {else}
+            分享红包
+            {/if}
+        </td>
+        <td class="paied">
+            {if $item['pay_status']==1 && $item['extact']==''}
+            待确定红包，未收到微信返回数据。
+            {elseif $item['pay_status']==1}
+            支付成功
+            {else}
+            支付失败
+            {/if}
+        </td>
+        <td>
+            {$item['create_at']}
+        </td>
+        <td class="isReissue">
+            {if $item['new_id']>0}
+            <a class="btn btn-default btn-sm" onclick="reissueInfo({$item['id']})">详情</a>
+            {/if}
+        </td>
+        <td class="operation">
+            {if !($item['pay_status']==1 && $item['extact']!='') && !($item['new_id']>0) && $item['wechat_blacklist']==0 }
+            <!--<a class="btn btn-default btn-sm stickcancel" id="{$item['id']}">修改状态</a>-->
+            <!--<a class="btn btn-default btn-sm stickcancel" id="{$item['id']}">补发红包</a>-->
+            <a class="btn btn-default btn-sm redRestatus" onclick="reStatus({$item['id']})">修改</a>
+            <a class="btn btn-default btn-sm redReissue" onclick="reissue({$item['id']},{$item['receive_money']})">补发</a>
+            {/if}
+            <a class="btn btn-default btn-sm" onclick="recordInfo({$item['id']})">详情</a>
+        </td>
+    </tr>
+    {/loop}
+</table>
+<div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+    {$pager}
+</div>
+<!--自定义弹出层HTML start-->
+<input type="hidden" value="0" id="Infos">
+<div id="light" style="display:none;width:100%;height:100%;z-index: 999;position: fixed;top:0;left:0;background:rgba(0,0,0,0.59);">
+    <div id="showlight" style="width:520px;height:460px;z-index: 9999;position: absolute;top:50%;left:50%;margin-left:-260px;margin-top:-230px;background:#fff;">
+        <p id="alertTitle" style="margin-top:15px; font-size:20px; font-weight:bold;text-align:center; ">支付回复详细信息</p>
+        <hr style="background-color:#ccc;height:1px;margin:10px 0px;">
+        <p id="alertContents" style="padding:10px 15px;font-size:16px;word-wrap:break-word;"></p>
+        <p id="hideWin" style="border:1px solid #ccc;padding:8px 20px;display:block;position: absolute;top:100%;left:50%;margin-left:-30px;margin-top:-50px;cursor: pointer;">关闭</p>
+    </div>
+</div>
+<div id="fade"></div>
+<!--自定义弹出层HTML end-->
+<!-- 选择用户 -->
+<div class="modal fade" id="user-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+
+<script>
+    var clickLock = false;
+
+    function reStatus(t){
+        if(clickLock){
+            return false;
+        }
+        // console.log(777777777);
+        clickLock = true;
+
+        if(confirm('此操作不可恢复，确认修改红包支付状态吗？')){
+            var data = {
+                id: t,
+                op: 'restatus'
+            };
+            $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+                var response = eval("(" + res + ")");
+                clickLock = false;
+                if(response.error==1){
+                    alert(response.message);
+                }else{
+                    var tdClass = "#tr" + t + " .paied";
+                    var tdClassOperation = "#tr" + t + " .operation";
+                    $(tdClass).html("支付成功");
+                    $(tdClassOperation).html('<a class="btn btn-default btn-sm" onclick="recordInfo({'+t+'})">详情</a>');
+                }
+                clickLock = false;
+            })
+        }else{
+            clickLock = false;
+        }
+
+    }
+    function reissue(t,p){
+        if(clickLock){
+            return false;
+        }
+        //console.log(777777777);
+        clickLock = true;
+        if(confirm('此操作不可恢复，请确认微信订单是否真实支付失败，确认补发' + p + '元红包给用户吗？')){
+            var data = {
+                id: t,
+                op: 'reissue'
+            };
+            $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+
+                var response = eval("(" + res + ")");
+                if(response.error==1){
+                    alert(response.message);
+                }else{
+                    var tdClass = "#tr" + t + " .paied";
+                    var tdClassOperation = "#tr" + t + " .operation";
+                    var tdClassReissue = "#tr" + t + " .isReissue";
+                    $(tdClass).html("支付成功");
+                    $(tdClassOperation).html('<a class="btn btn-default btn-sm" onclick="recordInfo('+t+')">详情</a>');
+                    $(tdClassReissue).html('<a class="btn btn-default btn-sm" onclick="reissueInfo('+t+')">详情</a>');
+                }
+                clickLock = false;
+            })
+        }else{
+            clickLock = false;
+        }
+    }
+
+
+    function recordInfo(t){
+        if(clickLock){
+            return false;
+        }
+        //console.log(777777777);
+        clickLock = true;
+        var data = {
+            id: t,
+            op: 'info'
+        };
+        $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+            var response = eval("(" + res + ")");
+            clickLock = false;
+            if(response.error==1){
+                alert(response.message);
+            }else{
+                //自定义弹出内容
+                var pHtml = '';
+                for (var property in response.message){
+                    pHtml += property + ':' + response.message[property] + "<br>";
+                }
+                $("#alertTitle").html('支付回复详细信息');
+                $("#alertContents").html(pHtml);
+                $("#light").fadeIn();
+                $("#showlight").slideDown();
+                $("#fade").fadeIn();
+            }
+            clickLock = false;
+        })
+
+    }
+    function reissueInfo(t){
+        if(clickLock){
+            return false;
+        }
+        //console.log(777777777);
+        clickLock = true;
+        var data = {
+            id: t,
+            op: 'reissueInfo'
+        };
+        $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+            var response = eval("(" + res + ")");
+            clickLock = false;
+            if(response.error==1){
+                alert(response.message);
+            }else{
+                //自定义弹出内容
+                var pHtml = '';
+                var InfoStr = {
+                    id: "id",
+                    openid: "openid",
+                    receive_money: "领取",
+                    all_balance: "总额",
+                    balance: "余额",
+                    out_trade_no: "单号",
+                    old_out_trade_no: "原单号",
+                    pay_types: "类型",
+                    pay_status: "状态",
+                    extact: "回执",
+                    operator: "补发人员",
+                    create_at: "领取时间",
+                    update_at: "更新时间",
+                };
+                for (var property in response.message){
+                    if(property=="extact"){
+                        pHtml += InfoStr[property] + ':';
+                        for (var ex_key in response.message[property]){
+                            pHtml += ex_key + '-' + response.message[property][ex_key] + ";";
+                        }
+                        pHtml += "<br>";
+                    }else{
+                        pHtml += InfoStr[property] + ':' + response.message[property];
+                        if(property=="openid" || property=="balance" || property=="out_trade_no" || property=="old_out_trade_no" || property=="pay_status" || property=="extact" || property=="create_at" || property=="update_at"){
+                            pHtml += "<br>";
+                        }else{
+                            pHtml += " | ";
+                        }
+                    }
+                }
+                $("#alertTitle").html('补发详细信息');
+                $("#alertContents").html(pHtml);
+                $("#light").fadeIn();
+                $("#showlight").slideDown();
+                $("#fade").fadeIn();
+            }
+            clickLock = false;
+        })
+
+    }
+    $(document).ready(function () {
+        //关闭按钮
+        $("#hideWin").click(function(){
+            $("#light").fadeOut();
+            $("#showlight").slideUp();
+            $("#fade").fadeOut();
+        });
+        //灰色部分也可以关闭
+        $("#light").click(function(){
+            $("#light").fadeOut();
+            $("#showlight").slideUp();
+            $("#fade").fadeOut();
+        });
+        //阻止时间冒泡
+        $("#showlight").click(function(event) {
+            return false;
+        });
+    });
+</script>
+
+
+{/if}
+{template 'common/footer'}
+
+<script>
+
+    // $(document).ready(function () {
+    //     //图片查看
+    //     var reason=$("select[name='status']").val();
+    //     console.log(reason)
+    //     if(reason==-1){
+    //         $("#refuse_reason").css('display','block');
+    //     }else{
+    //         $("#refuse_reason").css('display','none');
+    //     }
+    //
+    //     var viewer = new Viewer(document.getElementById('jq22'));
+    //     $('.multi-item').append('<div style="text-align: center"><input name="index" type="radio" value="" class="cover">设为封面</div>');
+    //
+    //     $('.multi-img-details .multi-item').each(function () {
+    //         var val = $(this).find("input[name='goods_images[]']").val();
+    //         $(this).find('.cover').val(val);
+    //         var img_url = $('#cover').val();
+    //         var img_val = val.substring(val.indexOf(".com/")+5,val.indexOf("?"));
+    //         if(img_val == img_url){
+    //             $(this).find('.cover').attr("checked","checked");
+    //
+    //         }
+    //     })
+    //     var goodsId = $('#goodsId').val();
+    //     $(".multi-img-details").css("width","800px");
+    //     if(goodsId!=''){
+    //         getGoodsInfo(goodsId);
+    //     }
+    //     $('#hidpost').hide();
+    // })
+    //
+    // //提交表单
+    // $('#post').on('click',function () {
+    //     var spanobj= $('#post');
+    //     var spanobjP=$('#hidpost');
+    //     spanobj.hide();
+    //     spanobjP.show();
+    //     $("#loading").css('display','block')
+    //     var error = $('#error').text();
+    //     if(error){
+    //         $("#loading").css('display','none')
+    //         spanobj.show();
+    //         spanobjP.hide();
+    //         alert('请填写已开奖的奖品id');
+    //         return false;
+    //     }
+    //     $.post($('.share-order').attr('action'),$('.share-order').serialize(),function (res) {
+    //         $("#loading").css('display','none')
+    //         var response = eval("(" + res + ")");
+    //         if(response.type=='success'){
+    //             alert(response.message);
+    //             location.href=response.redirect;
+    //         }else{
+    //             spanobj.show();
+    //             spanobjP.hide();
+    //             alert(response.message);
+    //         }
+    //     })
+    // })
+    //
+    // function limitNum() {
+    //     var num=$("#goods_num").val();
+    //     var people=$("input[name='cj[smoke_num]']").val();
+    //     if(num>100000){
+    //         $("#goods_num").val(100000);
+    //     }
+    //     if(people>1024){
+    //         $("input[name='cj[smoke_num]']").val(1024)
+    //     }
+    // }
+    // $(document).ready(function () {
+    //     var img=$("input[name='img_url']").val();
+    //     $("input[name='cj[goods_icon]']").parent().next().find(".img-responsive").attr('src', img);
+    // })
+    //
+    // $(".btn_seluser").click(function(){
+    //
+    //     $('#user-info').modal('show');
+    //     $('#Infos').val(0);
+    //
+    // });
+    // $(".btn_seluser1").click(function(){
+    //     var user_nicknames = $("#user_nicknames").val();
+    //     var goods_num = $("#goods_num").val();
+    //     $('#Infos').val(1);
+    //     $('#user-info').modal('show');
+    //
+    // });
+    // //搜索框
+    // $("select#field").change(function(){
+    //     var field = $(this).val();
+    //     if (field == 2) {
+    //         $("input[name='keyword']").attr('placeholder','请输入用户名进行搜索');
+    //     } else if(field == 1){
+    //         $("input[name='keyword']").attr('placeholder','请输入openid进行搜索');
+    //     } else {
+    //         $("input[name='keyword']").attr('placeholder','请输入用户名进行搜索');
+    //     }
+    // });
+    // // $("#kjfs").change(function(){
+    // //     var index = $(this).children('option:selected').val();
+    // //     if(index == 0){
+    // //         $("#kjsj").css("display","block");
+    // //         $("#kjrs").css("display","none");
+    // //     }else if(index == 1){
+    // //         $("#kjsj").css("display","none");
+    // //         $("#kjrs").css("display","block");
+    // //     }else{
+    // //         $("#kjsj").css("display","none");
+    // //         $("#kjrs").css("display","none");
+    // //     }
+    // // });
+
+
+
+
+
+</script>
+
+{else}
+
+
+    <ul class="nav nav-tabs">
+        <li {if $op == 'content' || $op == 'detail'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_red_packets', array('redDate'=>'1', 'op'=>'content'));}">用户分享数据</a></li>
+        <li {if $op == 'repeatList'}class="active"{/if}><a href="{php echo $this->createWeburl('choujiang_red_packets', array('redDate'=>'1', 'op'=>'repeatList'));}">补发列表</a></li>
+    </ul>
+
+    {if $op == 'content'}
+    <form class="form-horizontal search" action="" method="post" class="form1">
+
+        <div class="pull-right col-sm-8" style="padding-bottom: 10px">
+            <input type="hidden" id="status" value="{$condition}" />
+            <div class="col-sm-3" style="width:25%;float:left;padding:0px;margin:0 3% 0 3%">
+                <select name="field" id="field" class="form-control">
+                    <option value="0">--请选择--</option>
+                    <option value="1" {if $field==1} selected{/if}>openid</option>
+                    <option value="2" {if $field==2} selected{/if}>用户名</option>
+                </select>
+            </div>
+            <div class="input-group" style="width:69%;">
+                <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入奖品名称进行搜索" style="height:34px">
+                <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" data-val="" class="btn btn-primary" > 搜索</span>
+            </span>
+            </div>
+        </div>
+
+        <table class="table we7-table table-hover article-list vertical-middle">
+            <tr>
+                <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+                <th>ID</th>
+                <th>用户</th>
+                <th>总额/支付</th>
+                <th>余额</th>
+                <th>黑名单</th>
+                <th>操作</th>
+            </tr>
+            {loop $packetsList $item}
+            <tr>
+                <td>
+                    {$item['id']}
+                </td>
+                <td>
+                    <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['uid'], 'op' =>'detail'))}"><img style="width: 70px;height: 70px" src="{$item['avatar']}">{$item['nickname']}</a>/{$item['openid']}
+                </td>
+                <td>
+                    {$item['total_money']}/{$item['pay_money']}
+                </td>
+                <td>
+                    {$item['balance']}
+                </td>
+                <td>
+                    {if $item['red_black_user']==1}
+                    是
+                    {else}
+                    否
+                    {/if}
+                </td>
+                <td class="text-left">
+                    <a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('choujiang_red_packets', array('redDate'=>'1','openid' => $item['openid'], 'uid' => $item['uid'], 'op' =>'detail'))}" >详情</a>
+                    {if $item['balance']>0 && $item['red_black_user']!=1}
+                    <a class="btn btn-default btn-sm redReissue" onclick="reissue({$item['id']},{$item['balance']})">补发</a>
+                    {/if}
+                </td>
+            </tr>
+            {/loop}
+        </table>
+        <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+            {$pager}
+        </div>
+    </form>
+    <script type="text/javascript">
+        $('.form1').submit(function(){
+            if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+                return confirm('删除后不可恢复，您确定删除吗？');
+            }
+            return false;
+        });
+
+        ///分页处理 - start
+        $('#submitForm').click(function(){
+            $('.search').prop('action', '');
+            $("button[type='submit']").click();
+        });
+        var status=$("#status").val();
+        if(status){
+            $('.pagination li').each(function(e){
+                var href = $('.pagination li').eq(e).find('a').attr('href');
+                $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+                $('.pagination li').eq(e).find('a').attr('data-href', href);
+            });
+            $('.pagination li a').click(function(){
+                var href = $(this).attr('data-href');
+                $('.form-horizontal').prop('action', href);
+                $("button[type='submit']").click();
+            });
+        }
+        ///分页处理 - end
+
+
+        var clickLock = false;
+
+        function reissue(t,p){
+            if(clickLock){
+                return false;
+            }
+            clickLock = true;
+            if(confirm('此操作不可恢复，请确认用户支付和分享信息，确认补发' + p + '元红包给用户吗？')){
+                var data = {
+                    id: t,
+                    op: 'reissue',
+                    redDate: 1
+                };
+                $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+
+                    var response = eval("(" + res + ")");
+                    if(response.error==1){
+                        alert(response.message);
+                    }else{
+                        alert(response.message);
+                        location.reload();
+                    }
+                    clickLock = false;
+                })
+            }else{
+                clickLock = false;
+            }
+        }
+    </script>
+    {/if}
+
+
+    {if $op == 'repeatList'}
+    <form class="form-horizontal search" action="" method="post" class="form1">
+
+        <div class="pull-right col-sm-9" style="padding-bottom: 10px">
+            <input type="hidden" id="status" value="{$condition}" />
+            <div class="col-sm-3" style="width:20%;float:left;padding:0px;margin:0 3% 0 3%">
+                <select name="field" id="field" class="form-control">
+                    <option value="0">--请选择--</option>
+                    <option value="1" {if $field==1} selected{/if}>openid</option>
+                    <option value="2" {if $field==2} selected{/if}>用户名</option>
+                </select>
+            </div>
+            <div class="input-group" style="width:49%;">
+                <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入奖品名称进行搜索" style="height:34px">
+                <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" data-val="" class="btn btn-primary" > 搜索</span>
+            </span>
+            </div>
+        </div>
+
+        <table class="table we7-table table-hover article-list vertical-middle">
+            <tr>
+                <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+                <th style="width: 80px;">ID</th>
+                <th >用户/openid</th>
+                <th >订单号/微信单号</th>
+                <th style="width: 150px;">领取/余额/总额</th>
+                <th style="width: 60px;">支付类型</th>
+                <th style="width: 60px;">支付状态</th>
+                <th style="width: 108px;">领取时间</th>
+                <!--<th style="width: 80px;">补发</th>-->
+                <!--<th style="width: 80px;">操作</th>-->
+            </tr>
+            {loop $packetsList $item}
+            <tr>
+                <td>
+                    {$item['id']}
+                </td>
+                <td>
+                    <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['uid'], 'op' =>'detail'))}"><img style="width: 60px;height: 60px" src="{$item['avatar']}">{$item['nickname']}</a>/{$item['openid']}
+                </td>
+                <td>
+                    {$item['out_trade_no']}{loop $item['extact'] $key $val}{if $key=='payment_no'} / {$val}{/if}{/loop}
+                </td>
+                <td>
+                    {$item['receive_money']}/{$item['balance']}/{$item['all_balance']}
+                </td>
+                <td>
+                    {if $item['pay_types']==3}
+                    补发红包
+                    {/if}
+                </td>
+                <td class="paied">
+                    {if $item['pay_status']==1 && $item['extact']==''}
+                    待确定红包，未收到微信返回数据。
+                    {elseif $item['pay_status']==1}
+                    支付成功
+                    {else}
+                    支付失败
+                    {/if}
+                </td>
+                <td>
+                    {$item['create_at']}
+                </td>
+                <!--<td class="isReissue">
+                    {if $item['new_id']>0}
+                    <a class="btn btn-default btn-sm" onclick="reissueInfo({$item['id']})">详情</a>
+                    {/if}
+                </td>-->
+
+            </tr>
+            {/loop}
+        </table>
+        <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+            {$pager}
+        </div>
+        <!--自定义弹出层HTML start-->
+        <input type="hidden" value="0" id="Infos">
+        <div id="light" style="display:none;width:100%;height:100%;z-index: 999;position: fixed;top:0;left:0;background:rgba(0,0,0,0.59);">
+            <div id="showlight" style="width:520px;height:460px;z-index: 9999;position: absolute;top:50%;left:50%;margin-left:-260px;margin-top:-230px;background:#fff;border:1px solid #ccc;border-radius:7px;box-shadow:1 -1 5px #ccc;">
+                <p id="alertTitle" style="margin-top:15px; font-size:20px; font-weight:bold;text-align:center; ">支付回复详细信息</p>
+                <hr style="background-color:#ccc;height:1px;margin:10px 0px;">
+                <p id="alertContents" style="padding:10px 15px;font-size:16px;word-wrap:break-word;"></p>
+                <p id="hideWin" style="border:1px solid #ccc;padding:8px 20px;display:block;position: absolute;top:100%;left:50%;margin-left:-30px;margin-top:-50px;cursor: pointer;">关闭</p>
+            </div>
+        </div>
+        <div id="fade"></div>
+        <!--自定义弹出层HTML end-->
+    </form>
+    <script type="text/javascript">
+        // $('.form2').submit(function(){
+        //     if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+        //         return confirm('删除后不可恢复，您确定删除吗？');
+        //     }
+        //     return false;
+        // });
+
+        ///分页处理 - start
+        $('#submitForm').click(function(){
+            $('.search').prop('action', '');
+            $("button[type='submit']").click();
+        });
+        $('#types').change(function(){
+            $('.search').prop('action', '');
+            $("button[type='submit']").click();
+        });
+        var status=$("#status").val();
+        if(status){
+            $('.pagination li').each(function(e){
+                var href = $('.pagination li').eq(e).find('a').attr('href');
+                $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+                $('.pagination li').eq(e).find('a').attr('data-href', href);
+            });
+            $('.pagination li a').click(function(){
+                var href = $(this).attr('data-href');
+                $('.form-horizontal').prop('action', href);
+                $("button[type='submit']").click();
+            });
+        }
+
+        ///分页处理 - end
+
+    </script>
+    {/if}
+
+
+    <!-- 详情 -->
+    {if $op == 'detail'}
+
+    <!--<div class="pull-left">-->
+    <!--<a href="{php echo $this->createWeburl('choujiang_red_packets', array('openid' => $item['openid'], 'op' =>'content'))}" class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">返回</a>-->
+    <!--</div>-->
+    <br/>
+    <div>提现记录</div>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+            <th style="/*width: 50px;*/">ID</th>
+            <th>领取</th>
+            <th >余额</th>
+            <th >总额</th>
+            <th >支付类型</th>
+            <th >支付状态</th>
+            <th style="width: 108px;">领取时间</th>
+            <th >操作</th>
+        </tr>
+        {loop $record $item}
+        <tr id="tr{$item['id']}">
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                {$item['receive_money']}
+            </td>
+            <td>
+                {$item['balance']}
+            </td>
+            <td>
+                {$item['all_balance']}
+            </td>
+            <td>
+                {if $item['pay_types']==1}
+                新用户红包
+                {else}
+                分享红包
+                {/if}
+            </td>
+            <td class="paied">
+                {if $item['pay_status']==1 && $item['extact']==''}
+                待确定红包，未收到微信返回数据。
+                {elseif $item['pay_status']==1}
+                支付成功
+                {else}
+                支付失败
+                {/if}
+            </td>
+            <td>
+                {$item['create_at']}
+            </td>
+            <td class="operation">
+                {if !($item['pay_status']==1 && $item['extact']!='') && !($item['new_id']>0)}
+                <!--<a class="btn btn-default btn-sm stickcancel" id="{$item['id']}">修改状态</a>-->
+                <!--<a class="btn btn-default btn-sm stickcancel" id="{$item['id']}">补发红包</a>-->
+                <!--<a class="btn btn-default btn-sm redRestatus" onclick="reStatus({$item['id']})">修改</a>-->
+                <!--<a class="btn btn-default btn-sm redReissue" onclick="reissue({$item['id']},{$item['receive_money']})">补发</a>-->
+                {/if}
+                <a class="btn btn-default btn-sm" onclick="recordInfo({$item['id']})">详情</a>
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <div class="allPay" style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+
+    <div>新用户信息</div>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+            <th style="/*width: 50px;*/">ID</th>
+            <th>分享者ID</th>
+            <th >新用户ID</th>
+            <th >分享红包金额</th>
+            <th >新用户红包金额</th>
+            <th >分享时间</th>
+        </tr>
+        {loop $userNew $itemNew}
+        <tr id="trNew{$itemShare['id']}">
+            <td>
+                {$itemNew['id']}
+            </td>
+            <td>
+                {$itemNew['share_user_id']}
+            </td>
+            <td>
+                {$itemNew['user_id']}
+            </td>
+            <td>
+                {$itemNew['share_money']}
+            </td>
+            <td>
+                {$itemNew['new_user_money']}
+            </td>
+            <td>
+                {$itemNew['create_at']}
+            </td>
+        </tr>
+        {/loop}
+    </table>
+
+    <div>分享信息</div>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <!--<th ><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>-->
+            <th style="/*width: 50px;*/">ID</th>
+            <th>分享者ID</th>
+            <th >新用户ID</th>
+            <th >分享红包金额</th>
+            <th >新用户红包金额</th>
+            <th >分享时间</th>
+        </tr>
+        {loop $share $itemShare}
+        <tr id="trShare{$itemShare['id']}">
+            <td>
+                {$itemShare['id']}
+            </td>
+            <td>
+                {$itemShare['share_user_id']}
+            </td>
+            <td>
+                {$itemShare['user_id']}
+            </td>
+            <td>
+                {$itemShare['share_money']}
+            </td>
+            <td>
+                {$itemShare['new_user_money']}
+            </td>
+            <td>
+                {$itemShare['create_at']}
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <div class="allShare" style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager1}
+    </div>
+
+    <!--自定义弹出层HTML start-->
+    <input type="hidden" value="0" id="Infos">
+    <div id="light" style="display:none;width:100%;height:100%;z-index: 999;position: fixed;top:0;left:0;background:rgba(0,0,0,0.59);">
+        <div id="showlight" style="width:520px;height:460px;z-index: 9999;position: absolute;top:50%;left:50%;margin-left:-260px;margin-top:-230px;background:#fff;">
+            <p id="alertTitle" style="margin-top:15px; font-size:20px; font-weight:bold;text-align:center; ">支付回复详细信息</p>
+            <hr style="background-color:#ccc;height:1px;margin:10px 0px;">
+            <p id="alertContents" style="padding:10px 15px;font-size:16px;word-wrap:break-word;"></p>
+            <p id="hideWin" style="border:1px solid #ccc;padding:8px 20px;display:block;position: absolute;top:100%;left:50%;margin-left:-30px;margin-top:-50px;cursor: pointer;">关闭</p>
+        </div>
+    </div>
+    <div id="fade"></div>
+    <!--自定义弹出层HTML end-->
+    <!-- 选择用户 -->
+    <div class="modal fade" id="user-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+
+        <script>
+
+            ///分页处理 - start
+            // $('#submitForm').click(function(){
+            //     $('.search').prop('action', '');
+            //     $("button[type='submit']").click();
+            // });
+            // var status=$("#status").val();
+            // if(status){
+            //     $('.pagination li').each(function(e){
+            //         var href = $('.pagination li').eq(e).find('a').attr('href');
+            //         $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+            //         $('.pagination li').eq(e).find('a').attr('data-href', href);
+            //     });
+            //     $('.pagination li a').click(function(){
+            //         var href = $(this).attr('data-href');
+            //         $('.form-horizontal').prop('action', href);
+            //         $("button[type='submit']").click();
+            //     });
+            // }
+
+            var clickLock = false;
+
+            function reissue(t,p){
+                if(clickLock){
+                    return false;
+                }
+                clickLock = true;
+                if(confirm('此操作不可恢复，请确认微信订单是否真实支付失败，确认补发' + p + '元红包给用户吗？')){
+                    var data = {
+                        id: t,
+                        op: 'reissue'
+                    };
+                    $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+
+                        var response = eval("(" + res + ")");
+                        if(response.error==1){
+                            alert(response.message);
+                        }else{
+                            var tdClass = "#tr" + t + " .paied";
+                            var tdClassOperation = "#tr" + t + " .operation";
+                            var tdClassReissue = "#tr" + t + " .isReissue";
+                            $(tdClass).html("支付成功");
+                            $(tdClassOperation).html('<a class="btn btn-default btn-sm" onclick="recordInfo('+t+')">详情</a>');
+                            $(tdClassReissue).html('<a class="btn btn-default btn-sm" onclick="reissueInfo('+t+')">详情</a>');
+                        }
+                        clickLock = false;
+                    })
+                }else{
+                    clickLock = false;
+                }
+            }
+
+
+            function recordInfo(t){
+                if(clickLock){
+                    return false;
+                }
+                clickLock = true;
+                var data = {
+                    id: t,
+                    op: 'info',
+                    redDate: 1
+                };
+                $.post("{php echo $this->createWeburl('choujiang_red_reissue')}",data,function (res) {
+                    var response = eval("(" + res + ")");
+                    clickLock = false;
+                    if(response.error==1){
+                        alert(response.message);
+                    }else{
+                        //自定义弹出内容
+                        var pHtml = '';
+                        for (var property in response.message){
+                            pHtml += property + ':' + response.message[property] + "<br>";
+                        }
+                        $("#alertTitle").html('支付回复详细信息');
+                        $("#alertContents").html(pHtml);
+                        $("#light").fadeIn();
+                        $("#showlight").slideDown();
+                        $("#fade").fadeIn();
+                    }
+                    clickLock = false;
+                })
+            }
+
+            $(document).ready(function () {
+
+                //关闭按钮
+                $("#hideWin").click(function(){
+                    $("#light").fadeOut();
+                    $("#showlight").slideUp();
+                    $("#fade").fadeOut();
+                });
+                //灰色部分也可以关闭
+                $("#light").click(function(){
+                    $("#light").fadeOut();
+                    $("#showlight").slideUp();
+                    $("#fade").fadeOut();
+                });
+                //阻止时间冒泡
+                $("#showlight").click(function(event) {
+                    return false;
+                });
+            });
+        </script>
+
+
+        {/if}
+
+{/if}

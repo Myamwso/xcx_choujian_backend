@@ -1,0 +1,605 @@
+{template 'common/header'}
+{if $op == 'content'}
+<form class="form-horizontal" action="" method="post" class="form1" >
+     <div class="pull-right col-sm-8" style="padding:10px 0px 10px 0">
+         <div class="col-sm-3" style="width:25%;float:left;padding-right:20px;margin:0 0 0 3%">
+             <select name="is_machine_state" class="form-control">
+                 <option value="0">--请选择--</option>
+                 <option value="1" {if $_GPC['is_machine_state']==1} selected{/if}>真实用户</option>
+                 <option value="2" {if $_GPC['is_machine_state']==2} selected{/if}>机器人</option>
+             </select>
+         </div>
+        <div class="input-group" style="width:40%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入用户名/姓名/ 进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                 <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" class="btn btn-primary"> 搜索</span>
+            </span>
+        </div>
+    </div>
+    <div class="panel-heading">
+        <h3 class="panel-title">用户列表</h3>
+    </div>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <td style="width: 100px;">ID</td>
+            <td>用户</td>
+            <td>openid</td>
+            <td>手机号码</td>
+            <td>剩余发起次数</td>
+            <td>剩余免费参与次数</td>
+            <td>本月剩余中奖次数</td>
+            <td>时间</td>
+            <td>详情</td>
+        </tr>
+        {loop $products $item}
+        <tr>
+            <td>
+                {$item['id']}
+            </td>
+            <td>
+                <img src="{media $item['avatar']}" style="width:40px;height:40px" alt=""> {$item['nickname']}
+            </td>
+            <td>
+                {$item['openid']}
+            </td>
+            <td>
+                {if $item['tel']}
+                    {$item['tel']}
+                {/if}
+            </td>
+            <td>
+                {$item['join_num']}
+            </td>
+            <td>
+                {$item['smoke_num']}
+            </td>
+            <td>
+                {$item['winning_num']}
+            </td>
+            
+            <td>
+                {$item['create_time']}
+            </td>
+            <td class="text-right">
+                <a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['id'], 'op' =>'detail'))}" >详情</a>
+                {if $item['wechat_blacklist'] == 1}
+                <a class="btn btn-default btn-sm normal" id="{$item['id']}" >正常</a>
+                {/if}
+                {if $item['wechat_blacklist'] == 0}
+                <a class="btn btn-default btn-sm black" id="{$item['id']}">拉黑</a>
+                {/if}
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+{/if}
+
+{if $op == 'detail'}
+<form class="form-horizontal" class="form-horizontal" action="" method="post">
+    <style>
+        .mt{margin-top:2%;}
+    </style>
+    <input type="hidden" name="submit" value="1">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">用户信息详情 </h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">id：</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt">{$userInfo['id']}
+
+                        {if $userInfo['wechat_blacklist'] == 1}
+                        <a class="btn btn-default btn-sm normal" id="{$userInfo['id']}" >取消黑名单</a>
+                        {/if}
+                        {if $userInfo['wechat_blacklist'] == 0}
+                        <a class="btn btn-default btn-sm black" id="{$userInfo['id']}">拉黑</a>
+                        {/if}
+
+                    </p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">头像+昵称：</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <img src="{$userInfo['avatar']}" style="width:40px;height:40px" alt="">+{$userInfo['nickname']}
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">拉新总人数：</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt">{$userShare['share_num']}</p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">拉新红包总金额：</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt"><?php echo $totalMoney['total_money']?$totalMoney['total_money']:0; ?></p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">提现总金额：</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt"><?php echo $CashMoney['total']?$CashMoney['total']:0; ?></p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">剩余发起次数：</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt">{$userInfo['mf_num']}</p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">剩余免费参与次数：</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt">{$userInfo['yu_num']}</p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">本月剩余中奖次数：</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt">{$userInfo['winning_num']}</p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">参与抽奖次数：</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt">{$drawTimes}</p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">注册时间： </label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <p class="mt"><?php echo date('Y-m-d H:i:s',$userInfo['create_time']);?></p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">默认地址： </label>
+                <div class="form-controls col-sm-7" style="margin-left: 15px;">
+                    <p class="mt">联系人：{$userAddress['name']}，电话：{$userAddress['tel']}，地址：{$userAddress['area']}{$userAddress['address']}</p>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!--<ul class="nav nav-tabs" id="nav">-->
+    <!--<li class="active"><a data-val="1">今天</a></li>-->
+    <!--<li><a data-val="2">昨天</a></li>-->
+    <!--<li><a data-val="3">最近七天</a></li>-->
+    <!--<li><a data-val="4">最近30天</a></li>-->
+<!--</ul>-->
+<!--<div>-->
+    <!--<link rel="stylesheet" href="../addons/choujiang_page/resource/css/style.css">-->
+    <!--<div id="SmoothChart" class="Chart"></div>-->
+    <!--<script src='../addons/choujiang_page/resource/js/amcharts.js?1'></script>-->
+    <!--<script src='../addons/choujiang_page/resource/js/serial.js?1'></script>-->
+    <!--<script  src="../addons/choujiang_page/resource/js/index.js?201808"></script>-->
+<!--</div>-->
+
+{if $oldShare == '0'}
+<div class="" style="{if $uniacid!=11}display:none;{/if}margin-bottom: 5px;width: 100px;height: 40px;background: rgba(0,0,0,0.5);border-radius: 8px;text-align: center;line-height: 40px;color: white;"><a href="{php echo $this->createWeburl('choujiang_users', array('id' => $id, 'op' =>'detail', 'oldShare' =>'1'));}">切换旧数据</a></div>
+{else}
+<div class="" style="{if $uniacid!=11}display:none;{/if}margin-bottom: 5px;width: 100px;height: 40px;background: rgba(0,0,0,0.5);border-radius: 8px;text-align: center;line-height: 40px;color: white;"><a href="{php echo $this->createWeburl('choujiang_users', array('id' => $id, 'op' =>'detail'));}">切换新数据</a></div>
+{/if}
+
+<!--上下级关系-->
+<div class="pull-left col-sm-12" >
+    <h3>上级</h3>
+</div>
+
+<table class="table we7-table table-hover article-list vertical-middle">
+    <tr>
+        <td style="width: 35%">opneid</td>
+        <td style="width: 35%">用户(id)</td>
+        <td style="width: 10%">分享金额</td>
+        <td style="width: 10%">新用户金额</td>
+        <td style="width: 10%">提现总金额</td>
+    </tr>
+
+    <tr>
+        {if $top}
+        <td>
+            {$top['openid']}
+        </td>
+        <td>
+            <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $top['id'], 'op' =>'detail'))}"><img src="{$top['avatar']}" style="width: 40px;height: 40px">{$top['nickname']}({$top['id']})</a>
+        </td>
+        <td>
+            {$info['share_money']}
+        </td>
+        <td>
+            {$info['new_user_money']}
+        </td>
+        <td>
+            {$topUserCashMoney['total']}
+        </td>
+        {/if}
+    </tr>
+</table>
+<div class="pull-left col-sm-12" >
+    <h3>下级</h3>
+</div>
+
+<table class="table we7-table table-hover article-list vertical-middle">
+    <tr>
+        <td style="width: 35%">opneid</td>
+        <td style="width: 35%">用户(id)</td>
+        <td style="width: 10%">分享金额</td>
+        <td style="width: 10%">新用户金额</td>
+        <td style="width: 10%">提现总金额</td>
+    </tr>
+    {loop $reProducts $item}
+    <tr>
+
+        <td>
+            {$item['openid']}
+        </td>
+        <td>
+            <a href="{php echo $this->createWeburl('choujiang_users', array('id' => $item['user_id'], 'op' =>'detail'))}"><img src="{$item['avatar']}"  style="width: 40px;height: 40px">{$item['nickname']}({$item['user_id']})</a>
+        </td>
+        <td>
+            {$item['share_money']}
+        </td>
+        <td>
+            {$item['new_user_money']}
+        </td>
+        <td>
+            {$item['cash_money']}
+        </td>
+    </tr>
+    {/loop}
+</table>
+
+<div class="users-relation" style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+    {$Pager}
+</div>
+<!--ip历史信息-->
+<form class="form-horizontal" class="form-horizontal" action="" method="post">
+    <style>
+        .mt{margin-top:2%;}
+    </style>
+    <input type="hidden" name="submit" value="1">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">ip历史信息</h3>
+        </div>
+        <table class="table we7-table table-hover article-list vertical-middle">
+            <tr>
+                <td style="width: 100px;">ID</td>
+                <td>ip</td>
+                <td>登录时间</td>
+                <td>国家</td>
+                <td>省</td>
+                <td>市</td>
+                <td>创建时间</td>
+            </tr>
+            {loop $ipInfo $item}
+            <tr>
+                <td>
+                    {$item['id']}
+                </td>
+                <td>
+                    {$item['ip']}
+                </td>
+                <td>
+                    {$item['login_time']}
+                </td>
+                <td>
+                    {$item['country']}
+                </td>
+                <td>
+                    {$item['province']}
+                </td>
+                <td>
+                    {$item['city']}
+                </td>
+                <td>
+                    {$item['create_time']}
+                </td>
+            </tr>
+            {/loop}
+        </table>
+        <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+            {$ipPager}
+        </div>
+    </div>
+</form>
+<!--ua历史信息-->
+<form class="form-horizontal" class="form-horizontal" action="" method="post">
+    <style>
+        .mt{margin-top:2%;}
+    </style>
+    <input type="hidden" name="submit" value="1">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">ua历史信息</h3>
+        </div>
+        <table class="table we7-table table-hover article-list vertical-middle">
+            <tr>
+                <td style="width: 100px;">ID</td>
+                <td style="width: 40%;">UA</td>
+                <td style="width: 25%;">登录时间</td>
+                <td style="width: 25%;">创建时间</td>
+            </tr>
+            {loop $uaInfo $item}
+            <tr>
+                <td>
+                    {$item['id']}
+                </td>
+                <td>
+                    {$item['ua']}
+                </td>
+                <td>
+                    {$item['login_time']}
+                </td>
+                <td>
+                    {$item['create_time']}
+                </td>
+            </tr>
+            {/loop}
+        </table>
+        <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+            {$uaPager}
+        </div>
+    </div>
+</form>
+
+<form class="form-horizontal" class="form-horizontal" action="" method="post">
+    <style>
+        .mt{margin-top:2%;}
+    </style>
+    <input type="hidden" name="submit" value="1">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">设备历史信息</h3>
+        </div>
+        <table class="table we7-table table-hover article-list vertical-middle">
+            <tr>
+                <td style="width: 100px;">ID</td>
+                <td>品牌</td>
+                <td>型号</td>
+                <td>系统</td>
+                <td>微信版本</td>
+                <td>登录时间</td>
+                <td>创建时间</td>
+            </tr>
+            {loop $epInfo $item}
+            <tr>
+                <td>
+                    {$item['id']}
+                </td>
+                <td>
+                    {$item['brand']}
+                </td>
+                <td>
+                    {$item['model']}
+                </td>
+                <td>
+                    {$item['system']}
+                </td>
+                <td>
+                    {$item['version']}
+                </td>
+                <td>
+                    {$item['login_time']}
+                </td>
+                <td>
+                    {$item['create_time']}
+                </td>
+            </tr>
+            {/loop}
+        </table>
+        <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+            {$epPager}
+        </div>
+    </div>
+</form>
+
+{/if}
+
+<script>
+    var dataDraw;
+    $(function () {
+        getChartData('today');
+    })
+
+    //图表数据请求
+    $('#nav li').click(function(e){
+        var date;
+        var condition= e.target.innerText;
+        $(this).siblings('li').removeClass('active');
+        $(this).addClass('active');
+        if(condition=='今天'){
+            date= 'today';
+        }else if (condition == '昨天') {
+            date = 'yesterday';
+        } else if (condition == '最近七天') {
+            date = 'lastseven';
+        } else{
+            date = 'lastthirty';
+        }
+        getChartData(date);
+    });
+
+    function getChartData(date) {
+        var graphs=[
+            {
+                "balloonColor": "#5c389f",
+                "balloonText":"[[title]] : [[value]]",
+                "bullet": "square",
+                "fillAlphas": ".7",
+                "fillColorsField": "lineColor",
+                "gapPeriod": 0,
+                "id": "AmGraph-2",
+                "legendValueText": "[[value]]",
+                "lineAlpha": 0,
+                "lineColor": "#428bca",
+                "lineColorField": "lineColor",
+                "title": "访问人数",
+                "type": "smoothedLine",
+                "valueField": "visit"
+            },
+            {
+                "balloonColor": "#191919",
+                "balloonText": "[[title]] : [[value]]",
+                "bullet": "round",
+                "bulletAlpha": 0,//圆形样式
+                "bulletBorderAlpha": 1,
+                "bulletBorderColor": "#00d856",
+                "bulletSize": 6,
+                "color": "#1c95f3",
+                "fillAlphas": ".7",
+                "fillColorsField": "lineColor",
+                "fixedColumnWidth": 0,
+                "gapPeriod": 0,
+                "id": "AmGraph-1",
+                "legendValueText": "[[value]]",
+                "lineAlpha": 0,
+                "lineColor": "#00d856",
+                "lineColorField": "lineColor",
+                "title": "新用户数",
+                "type": "smoothedLine",
+                "valueField": "new"
+            }
+        ];
+
+        var valueAxis= new AmCharts.ValueAxis();
+        valueAxis.axisColor = "#4B4F5E";//轴的颜色
+        valueAxis.axisThickness = 1;//轴的宽度
+        valueAxis.axisAlpha = 0.9;
+        valueAxis.gridAlpha = 0.1;//轴的透明度，值介于0-1之间，0全透明
+        valueAxis.tickLength =0;//轴从下到上像左或右伸出来的延长线
+        // valueAxis.minimum = 0;//轴的最小值，如果不设置那么最小值根据数据动态变化
+        // valueAxis.maximum = 10;//轴的最大值，如果不设置那么最大值根据数据动态变化
+        valueAxis.logarithmic = false;//是否为对数函数分布，一般轴的刻度是均匀划分的，当该属性设置为true的时候，刻度分布呈对数形式分布
+        valueAxis.integersOnly = true;//是否只显示整数，如果为true轴的刻度只显示整数形式
+        // valueAxis.gridCount = 10;//最大刻度个数
+        // valueAxis.unit = "%";//单位
+//        valueAxis.labelsEnabled = true;//是否显示轴标签，默认值为true
+        valueAxis.inside = false;//轴的刻度值显示在表里面还是外面
+        valueAxis.position = "left";//轴的位置，默认在左侧
+        // valueAxis.stackType = "0%";
+        $.post("{php echo $this->createWeburl('getChartData')}",{date:date},function (res) {
+            console.log(res);
+            dataDraw=eval('('+res+')');
+            initConfig.graphs = graphs;
+            initConfig.dataProvider = dataDraw;
+            initConfig.chartScrollbar={
+                "enabled": true,
+                "autoGridCount": true,
+                "GridCount": 5,
+                "backgroundAlpha": 0,
+                "color": "#888888",
+                "graph": "g1",
+                "graphFillAlpha": 0,
+                "graphLineAlpha": 0,
+                "graphLineColor": "#c2c2c2",
+                "graphType": "smoothedLine",
+                "gridAlpha": 0.7,
+                "scrollbarHeight": 50,
+                "selectedBackgroundAlpha": 0.1,
+                "selectedBackgroundColor": "#888888",
+                "selectedGraphFillAlpha": 0,
+                "selectedGraphLineAlpha": 1,
+            };
+
+            var chart = AmCharts.makeChart("SmoothChart", initConfig);
+            chart.addValueAxis(valueAxis);
+            chart.addListener("rendered", zoomChart);
+            if (chart.zoomChart) {
+                chart.zoomChart();
+            }
+            function zoomChart() {
+                chart.zoomToIndexes(Math.round(chart.dataProvider.length * 0.0), Math.round(chart.dataProvider.length * 1.0));
+            }
+        })
+    }
+    $('#submitForm').click(function(){
+        $('.form-horizontal').prop('action', '');
+        $("button[type='submit']").click();
+    });
+</script>
+
+<script>
+    //恢复正常状态
+    $(document).on('click','.normal',function(){
+        id = $(this).attr('id');
+        var del = $("#"+id);
+        var _html = '<a class="btn btn-default btn-sm black" id="'+id+'">拉黑</a>';
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            url: "{php echo $this->createWeburl('Choujiang_users', array( 'op' => 'normal'))}",
+            data: {id: id},
+            success:function(result){
+                if(result.type == "success" ){
+                    alert('恢复状态成功！');
+                    $("#"+id).parent().append(_html);
+                    del.remove();
+                }else{
+                    alert('恢复状态失败！');
+                }
+            }
+        })
+    });
+    //拉黑
+    $(document).on('click','.black',function(){
+        id = $(this).attr('id');
+        var del = $("#"+id);
+        var _html = '<a class="btn btn-default btn-sm normal" id="'+id+'" >正常</a>';
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            url: "{php echo $this->createWeburl('Choujiang_users', array( 'op' => 'black'))}",
+            data: {id: id},
+            success:function(result){
+                if(result.type == "success" ){
+                    alert('拉黑成功！');
+                    $("#"+id).parent().append(_html);
+                    del.remove();
+                }else{
+                    alert('拉黑失败！');
+                }
+            }
+        })
+    });
+    ///分页处理 - start
+    // $('#submitForm').click(function(){
+    //     $('.form-horizontal').prop('action', "{php echo url('site/entry/choujiang_users', array('m' => 'Choujiang_page'));}");
+    //     $("button[type='submit']").click();
+    // });
+    // $('.pagination li').each(function(e){
+    //     var href = $('.pagination li').eq(e).find('a').attr('href');
+    //     $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+    //     $('.pagination li').eq(e).find('a').attr('data-href', href);
+    // });
+    // $('.pagination li a').click(function(){
+    //     var href = $(this).attr('data-href');
+    //     $('.form-horizontal').prop('action', href);
+    //     var relation = $(this).parents().hasClass('users-relation');
+    //     if(relation){
+    //         window.location.href=href;
+    //     }
+    //     $("button[type='submit']").click();
+    // });
+    ///分页处理 - end
+</script>
+{template 'common/footer'}

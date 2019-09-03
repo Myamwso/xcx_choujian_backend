@@ -1,0 +1,1112 @@
+{template 'common/header'}
+<script>
+    var stroge=window.localStorage;
+    stroge.getItem('formData');
+
+</script>
+<style>
+    .cardbox{
+
+        position: relative;
+        /*background:red;*/
+    }
+   .dels{
+    position: absolute;
+    top:0px;
+    right:40%;
+   }
+
+    .toast{
+        width:100px;
+        height:40px;
+        background:transparent;
+        background:rgba(0,0,0,0.5);
+        border-radius:8px;
+        position: fixed;
+        margin:auto;left:0; right:0; top:0; bottom:0;
+        z-index: 999;
+        text-align: center;
+        line-height: 40px;
+        color: white;
+    }
+    .multi-img-details .multi-item {
+        height: auto;
+    }
+</style>
+<div class=" toast" id="loading" style="display: none"><span>提交中...</span></div>
+
+{if $op == 'content'}
+
+<div class="pull-right">
+    <a href="{php echo $this->createWeburl('choujiang_goods', array('op'=>'post'));}"  class="btn btn-primary we7-padding-horizontal" style="margin-bottom: 20px">添加奖品</a>
+</div>
+<form class="form-horizontal" action="" method="post" class="form1">
+    <div class="pull-right col-sm-8">
+        <input type="hidden" id="status" value="{$condition}" />
+        <div class="col-sm-3" style="width:25%;float:left;padding:0px;margin:0 0 0 3%">
+             <select name="goods_state" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="1" {if $goods_state==1} selected{/if}>已开奖</option>
+                <option value="2" {if $goods_state==2} selected{/if}>待开奖</option>
+                <option value="3" {if $goods_state==3} selected{/if}>待审核</option>
+                <option value="4" {if $goods_state==4} selected{/if}>审核未通过</option>
+                 <option value="5" {if $goods_state==5} selected{/if}>已过期</option>
+            </select>
+        </div>
+        <div class="col-sm-3" style="width:25%;float:left;padding:0px;margin:0 3% 0 3%">
+            <select name="version" class="form-control">
+                <option value="0">--请选择--</option>
+                <option value="1" {if $version==1} selected{/if}>普通版</option>
+                <option value="2" {if $version==2} selected{/if}>高级版</option>
+            </select>
+        </div>
+        <div class="input-group" style="width:40%;">
+            <input type="text" class="input-sm form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="请输入奖品名称进行搜索" style="height:34px">
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit" style="display: none"> </button>
+                <span id="submitForm" data-val="" class="btn btn-primary" > 搜索</span>
+            </span>
+        </div>
+    </div>
+    <table class="table we7-table table-hover article-list vertical-middle">
+        <tr>
+            <th style="width: 50px;"><input type="checkbox"  onclick="var ck = this.checked;$(':checkbox').each(function(){this.checked = ck});" name=''></th>
+            <td style="width: 100px;">ID</td>
+            <td>奖品名称</td>
+            <td>奖品类别</td>
+            <td>奖品数量</td>
+            <td width="100px" >奖品缩略图</td>
+            <td>发起人</td>
+            <td>开奖方式</td>
+            <td>状态</td>
+            <td>版本</td>
+            <td class="text-right">操作</td>
+        </tr>
+        {loop $products $item}
+        <tr>
+            <td><input type="checkbox" value="{$item['id']}" name="deleteall[]"></td>
+            <td>
+                {$item['id']}
+            </td>
+
+            <td>
+                {$item['goods_name']}
+            </td>
+            <td>
+                {$item['goods_status_name']}
+            </td>
+            <td>
+                {$item['goods_num']}
+            </td>
+            <td >
+
+                <img src="{$item['goods_icon']}" width="130px" height="70px"  alt="">
+
+            </td>
+            <td>
+                {$item['goods_username']}
+            </td>
+            <td>
+                {$item['smoke_name']}
+            </td>
+            <td>
+                {$item['zh_status']}
+            </td>
+            <td>
+                {if $item['is_pintuan']==1}<span style="color: red">高级版</span>{else}普通版{/if}
+            </td>
+            <td class="text-right">
+                {if $item['stick_time'] != '0000-00-00 00:00:00'}
+                <a class="btn btn-default btn-sm stickcancel" id="{$item['id']}">取消置顶</a>
+                {else}
+                <a class="btn btn-default btn-sm stick" id="{$item['id']}">置顶</a>
+                {/if}
+                <a class="btn btn-default btn-sm" href="{php echo $this->createWeburl('choujiang_goods', array('id' => $item['id'], 'op' =>'post'))}" >编辑</a>
+                <a class="btn btn-default btn-sm" onclick="return confirm('此操作不可恢复，确认吗？'); return false;" href="{php echo $this->createWeburl('choujiang_goods', array('id' => $item['id'], 'op' => 'delete'))}">删除</a>
+                {if $item['haibao']==1}
+                <a class="btn btn-default btn-sm" onclick="refreshCode(this,{$item['id']})" href="javascript:0">更新二维码</a>
+                {/if}
+            </td>
+        </tr>
+        {/loop}
+    </table>
+    <table class="table">
+        <tr>
+            <td>
+                <input class="btn btn-primary" type="submit" value="删除" name="submit" style="height: 30px;">
+            </td>
+        </tr>
+    </table>
+    <div style="margin:0 auto;margin-right: auto;vertical-align: middle;text-align: center;" >
+        {$pager}
+    </div>
+</form>
+<script type="text/javascript">
+    $('.form1').submit(function(){
+        if($(":checkbox[name='deleteall[]']:checked").size() > 0){
+            return confirm('删除后不可恢复，您确定删除吗？');
+        }
+        return false;
+    });
+
+    ///分页处理 - start
+    $('#submitForm').click(function(){
+        $('.form-horizontal').prop('action', '');
+        $("button[type='submit']").click();
+    });
+    var status=$("#status").val();
+    if(status){
+        $('.pagination li').each(function(e){
+            var href = $('.pagination li').eq(e).find('a').attr('href');
+            $('.pagination li').eq(e).find('a').attr('href','javascript:;');
+            $('.pagination li').eq(e).find('a').attr('data-href', href);
+        });
+        $('.pagination li a').click(function(){
+            var href = $(this).attr('data-href');
+            $('.form-horizontal').prop('action', href);
+            $("button[type='submit']").click();
+        });
+    }
+
+    ///分页处理 - end
+</script>
+{/if}
+
+<!-- 编辑新增 -->
+{if $op == 'post'}
+<form class="form-horizontal" action="" method="post">
+    <input type="hidden" name="submit" value="1">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">奖品管理 <span style="color:#7E7E7E;font-size:13px;margin-left:10px">(当已有用户参与该活动时,不可编辑)</span></h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">奖品类别</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <select name="cj[goods_status]" class="form-control ng-pristine ng-untouched ng-valid ng-empty" id="good_lb">
+                        <option value="0" {if $item['goods_status']==0} selected{/if}>实物</option>
+                        <!--<option value="1" {if $item['goods_status']==1} selected{/if}>红包</option>-->
+                        <!--<option value="2" {if $item['goods_status']==2} selected{/if}>电子卡</option>-->
+                    </select>
+                </div>
+            </div>
+        <!-- 实物 -->
+            <div id="shiwu" {if $item[goods_status] == ''}style="display:block"{else if $item[goods_status] == 0}style="display:block"{/if}>
+                {if $item[goods_status] != 1}
+                    <div class="form-group">
+
+                        <label for="" class="control-label col-sm-2"><font style="vertical-align: middle;color: red">*</font>奖品名称</label>
+                        <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                            <input type="text" name="goods_name1" id="goods_name" value="{$item['goods_name']}" maxlength="15" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                        </div>
+                        <div class="col-sm-1"></div>
+                        <div class="form-controls col-sm-3 help-block">不能超过15个字</div>
+                    </div>
+                {/if}
+                <div class="form-group">
+                    <label for="" class="control-label col-sm-2"><font style="vertical-align: middle;color: red">*</font>数量</label>
+                    <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                        <input type="number" name="goods_num1" id="goods_num" value="{$item['goods_num']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  oninput="limitNum()"   placeholder="" autocomplete="off">
+                    </div>
+                    <div class="col-sm-1"></div>
+                    <div class="form-controls col-sm-3 help-block">数量不能超过100000</div>
+                </div>
+            </div>
+        <!-- 红包 -->
+            <!--<div id="hongbao" {if $item[goods_status] == 1}style="display:block"{else}style="display:none"{/if}>-->
+                <!--<div class="form-group">-->
+                    <!--<label for="" class="control-label col-sm-2">单个红包金额</label>-->
+                    <!--<div class="form-controls col-sm-5" style="margin-left: 15px;">-->
+                        <!--<input type="text" name="cj[red_envelope]" value="{$item['red_envelope']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                    <!--</div>-->
+                    <!--<div class="col-sm-1"></div>-->
+                    <!--<div class="form-controls col-sm-3 help-block">单个红包金额</div>-->
+                <!--</div>-->
+                <!--<div class="form-group">-->
+                    <!--<label for="" class="control-label col-sm-2"><font style="vertical-align: middle;color: red">*</font>数量</label>-->
+                    <!--<div class="form-controls col-sm-5" style="margin-left: 15px;">-->
+                        <!--<input type="number" name="goods_num2" id="goods_num" value="{$item['goods_num']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                    <!--</div>-->
+                    <!--<div class="col-sm-1"></div>-->
+                    <!--<div class="form-controls col-sm-3 help-block">数量不能超过100000</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!-- 电子卡 -->
+            <!--<div id="dianzika" {if $item[goods_status] == 2}style="display:block"{else}style="display:none"{/if}>-->
+                <!--<div class="form-group">-->
+                    <!--<label for="" class="control-label col-sm-2"><font style="vertical-align: middle;color: red">*</font>奖品名称</label>-->
+                    <!--<div class="form-controls col-sm-5" style="margin-left: 15px;">-->
+                        <!--<input type="text" name="goods_name3" id="goods_name" value="{$item['goods_name']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                    <!--</div>-->
+                    <!--<div class="col-sm-1"></div>-->
+                    <!--<div class="form-controls col-sm-3 help-block">不能超过20个字</div>-->
+                <!--</div>-->
+                <!--<div id="card">-->
+                    <!--{if $item[goods_status] == 2}-->
+                        <!--{loop $item[card_info] $card}-->
+                        <!--&lt;!&ndash; 编辑 &ndash;&gt;-->
+                            <!--<div class="cardbox">-->
+                                <!--<div class="form-group">-->
+                                    <!--<label for="" class="control-label col-sm-2">卡号</label>-->
+                                    <!--<div class="form-controls col-sm-5" style="margin-left: 15px;">-->
+                                        <!--<input type="text" name="card_number[]"  value="{$card[0]}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                                    <!--</div>-->
+                                    <!--<div class="col-sm-1"></div>-->
+                                    <!--<div class="form-controls col-sm-3 help-block">电子卡号</div>-->
+                                <!--</div>-->
+
+                                <!--<div class="form-group">-->
+                                    <!--<label for="" class="control-label col-sm-2">密码</label>-->
+                                    <!--<div class="form-controls col-sm-5" style="margin-left: 15px;">-->
+                                        <!--<input type="text" name="card_password[]" value="{$card[1]}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                                    <!--</div>-->
+                                    <!--<div class="col-sm-1"></div>-->
+                                    <!--<div class="form-controls col-sm-3 help-block">电子卡密码</div>-->
+                                <!--</div>-->
+                                <!--<button class="dels">删除</button>-->
+
+                            <!--</div>-->
+                        <!--{/loop}-->
+                    <!--{else}-->
+                    <!--&lt;!&ndash; 新增 &ndash;&gt;-->
+                        <!--<div class="cardbox">-->
+                            <!--<div class="form-group">-->
+                                <!--<label for="" class="control-label col-sm-2">卡号</label>-->
+                                <!--<div class="form-controls col-sm-5" style="margin-left: 15px;">-->
+                                    <!--<input type="text" name="card_number[]"  class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                                <!--</div>-->
+                                <!--<div class="col-sm-1"></div>-->
+                                <!--<div class="form-controls col-sm-3 help-block">电子卡号</div>-->
+                            <!--</div>-->
+
+                            <!--<div class="form-group">-->
+                                <!--<label for="" class="control-label col-sm-2">密码</label>-->
+                                <!--<div class="form-controls col-sm-5" style="margin-left: 15px;">-->
+                                    <!--<input type="text" name="card_password[]"  class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">-->
+                                <!--</div>-->
+                                <!--<div class="col-sm-1"></div>-->
+                                <!--<div class="form-controls col-sm-3 help-block">电子卡密码</div>-->
+                            <!--</div>-->
+                            <!--<button  class="dels">删除</button>-->
+                        <!--</div>-->
+                    <!--{/if}-->
+                <!--</div>-->
+
+                 <!--<div class="form-group">-->
+                    <!--<label for="" class="control-label col-sm-2"></label>-->
+                    <!--<div class="form-controls col-sm-5" style="margin-left: 15px;">-->
+                        <!--<input type="button" value="添加电子卡" id="addCard">-->
+                    <!--</div>-->
+                    <!--<div class="col-sm-1"></div>-->
+                    <!--<div class="form-controls col-sm-3 help-block"></div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!-- 结束 -->
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">机器人数量</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <input type="text" name="machine_num" id="machine_num" value="{$machine['machine_num']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty" placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">参加抽奖的虚拟用户数量</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2" >机器人是否会中奖抽奖</label>
+                <div class="form-controls col-sm-2" style="margin-left: 15px;">
+                    <select name="cj[machine_canyu]" id="machine_canyu" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                        <option value="0" {if $item['machine_canyu']==0} selected{/if}>否</option>
+                        <option value="1" {if $item['machine_canyu']==1} selected{/if}>是</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2"><font style="vertical-align: middle;color: red">*</font>奖品缩略图</label>
+                <input type="hidden" name="img_url" value="{$img_url}">
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    {php echo tpl_form_field_multi_image('cj[goods_icon]', $item['goods_icon'])}
+
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">(图片尺寸750*400px)</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">晒单封面图</label>
+                <input type="hidden" name="share_img" value="{$share_img}">
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    {php echo tpl_form_field_image('cj[share_img]', $item['share_img'])}
+
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">(图片尺寸750*400px)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">奖品简介</label>
+                <div class="form-controls col-sm-8" style="margin-left: 15px;">
+                    {php echo tpl_ueditor('cj[content]',$item['content']);}
+
+                    <script>
+                        $(function(){
+                            setTimeout(function(){
+                                $("#edui47").remove();
+                                $("#edui145").remove();
+                                $("#edui53").remove();
+                                $("#edui136").remove();
+                                $("#edui141").remove();
+                                $("#edui142").remove();
+                                $("#edui143").remove();
+                                $("#edui116").remove();
+                                $("#edui119").remove();
+                                $("#edui120").remove();
+                                $("#edui121").remove();
+                                $("#edui122").remove();
+                                $("#edui123").remove();
+                                $("#edui124").remove();
+                                $("#edui125").remove();
+                                $("#edui126").remove();
+                                $("#edui127").remove();
+                                $("#edui128").remove();
+                                $("#edui129").remove();
+                                $("#edui130").remove();
+                                $("#edui131").remove();
+                            }, 500);
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">开奖方式</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <select name="cj[smoke_set]" class="form-control ng-pristine ng-untouched ng-valid ng-empty" id="kjfs">
+                        <option value="2" {if $item['smoke_set']==2} selected{/if}>手动开奖</option>
+                        <option value="0" {if $item['smoke_set']==0} selected{/if}>开奖时间</option>
+                        <option value="1" {if $item['smoke_set']==1} selected{/if}>开奖人数</option>
+                        <option value="3" {if $item['smoke_set']==3} selected{/if}>现场开奖</option>
+                    </select>
+                </div>
+            </div>
+
+
+
+
+            <div class="form-group" id="kjsj" {if $item['smoke_set']!=0}style="display:none;"{/if}>
+                <label for="" class="control-label col-sm-2">开奖时间</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <div class="col-sm-6" style="padding-left: 0;">
+                        <input type="text" name="date"  value="{if $item['date']}{$item['date']}{else}{$curDate}{/if}" placeholder="请选择日期时间" readonly="readonly" class="datetimepicker form-control" style="padding-left:12px;" />
+                        <script type="text/javascript">
+                            require(["datetimepicker"], function(){
+                                var option = {
+                                    lang : "zh",
+                                    step : 5,
+                                    timepicker : false,
+                                    closeOnDateSelect : true,
+                                    format : "Y-m-d",
+                                    scrollMonth: false,
+                                    minDate:'{php echo date("Y/m/d")}',
+                                    maxDate:'{php echo date("Y/m/d",strtotime("+7 day"))}'
+                                };
+                                $(".datetimepicker[name = 'date']").datetimepicker(option);
+                            });
+                        </script>
+                    </div>
+                    <div class="col-sm-6" style="padding-left: 0;padding-right: 0;">
+
+                        {php echo tpl_form_field_clock(time,$item['time'])}
+                    </div>
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">开奖时间</div>
+            </div>
+
+
+
+            <div class="form-group" id="kjrs" {if $item['smoke_set']!=1}style="display:none;"{/if}>
+                <label for="" class="control-label col-sm-2">开奖人数</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <input type="text" name="cj[smoke_num]" id="smoke_num" value="{$item['smoke_num']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  oninput="limitNum()"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">多少人参与后,自动开奖</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">是否限制区域</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;margin-top: 10px;">
+                    <input type="radio" name="cj[is_area]" value="0" class="onclick2" {if $item['is_area'] == 0} checked="checked" {/if}> 否
+                    <input type="radio" name="cj[is_area]" value="1" class="onclick2" {if $item['is_area'] == 1} checked="checked" {/if} style="margin-left:30px;"> 是
+                </div>
+            </div>
+            <div class="form-group area" style="display:none">
+                <label for="" class="control-label col-sm-2">区域选择</label>
+                <div class="form-controls col-sm-5 area_choose" style="margin-left: 15px;">
+
+                    <div class="row row-fix tpl-district-container">
+                        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+                            <select name="cj[province]" data-value="{$item['province']}" class="form-control tpl-province">
+                            </select>
+                        </div>
+                        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+                            <select name="cj[city]" data-value="{$item['city']}" class="form-control tpl-city">
+                            </select>
+                        </div>
+                    </div>
+                    <script type="text/javascript">
+                        require(["district"], function(dis){
+                            $(".tpl-district-container").each(function(){
+                                var elms = {};
+                                elms.province = $(this).find(".tpl-province")[0];
+                                elms.city = $(this).find(".tpl-city")[0];
+                                elms.district = $(this).find(".tpl-district")[0];
+                                var vals = {};
+                                vals.province = $(elms.province).attr("data-value");
+                                vals.city = $(elms.city).attr("data-value");
+                                vals.district = $(elms.district).attr("data-value");
+                                dis.render(elms, vals, {withTitle: true});
+                            });
+                        });
+                    </script>
+
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">只能在选择的区域才能参与该奖品</div>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">奖品赞助商</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <input type="text" name="cj[goods_sponsorship]" id="goods_sponsorship" value="{$item['goods_sponsorship']}" maxlength="5" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">建议不要超过五个字</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">小程序appid</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <input type="text" name="cj[sponsorship_appid]" value="{$item['sponsorship_appid']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">此处填写需要跳转的小程序appid，必须是同一公众号下关联，而非同个开放平台账号下</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">跳转小程序路径</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <input type="text" name="cj[sponsorship_url]" value="{$item['sponsorship_url']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">需要跳转的小程序路径，留空则不跳转。填写实例: /page/index/index?id=123</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">奖品赞助商标语</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <input type="text" name="cj[sponsorship_text]" id="sponsorship_text" value="{$item['sponsorship_text']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  maxlength="40" placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">赞助商简介(一句话)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">赞助商介绍</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <textarea name="cj[sponsorship_content]" class="form-control" value="{$item['sponsorship_content']}" placeholder='建议100字以内'>{$item['sponsorship_content']}</textarea>
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">请输入赞助商信息</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2"><font style="color:red;">*</font>发起人</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <input type="text" name="link" id="user_nickname" class="form-control" value="{$item['goods_username']}" onblur="seluser()" style="display:inline-block;width:78%">
+                    <input type="hidden" name="cj[goods_openid]" id="select_uid" value="{$item['goods_openid']}">
+                <button class="btn btn-default btn_seluser" type="button" style="width:20%;height:34px;line-height:15px;">选择用户</button>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">是否指定中奖者</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;margin-top: 10px;">
+                    <input type="radio" name="cj[The_winning]" value="0" class="onclick" {if $item['The_winning'] == 0} checked="checked" {/if}> 否
+                    <input type="radio" name="cj[The_winning]" value="1" class="onclick" {if $item['The_winning'] == 1} checked="checked" {/if} style="margin-left:30px;"> 是
+                </div>
+            </div>
+
+            <div class="form-group goods_winning" style="display:none">
+                <label for="" class="control-label col-sm-2">中奖者</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <input type="text" name="cj[goods_winning]" id="user_nicknames" class="form-control" value="{$item['goods_winning']}" onblur="selusers()" style="display:inline-block;width:78%">
+                    <!-- <input type="hidden" name="cj[goods_winning]" id="select_uid1" value="{$item['goods_winning']}"> -->
+                    <button class="btn btn-default btn_seluser1" type="button" style="width:20%;height:34px;line-height:15px;">选择用户</button>
+                </div>
+                <div class="form-controls col-sm-3 help-block">指定后、如不参与抽奖将作废</div>
+
+
+            </div>
+
+             <div class="form-group">
+                <label for="" class="control-label col-sm-2">参与抽奖方式</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;margin-top: 10px;">
+                    <input type="radio" name="cj[join_conditions]" value="0" class="onclick1" {if $item['join_conditions'] == 0} checked="checked" {/if}> 默认
+                    <input type="radio" name="cj[join_conditions]" value="1" class="onclick1" {if $item['join_conditions'] == 1} checked="checked" {/if} style="margin-left:30px;"> 付费
+                    <!--<input type="radio" name="cj[join_conditions]" value="2" class="onclick1" {if $item['join_conditions'] == 2} checked="checked" {/if} style="margin-left:30px;"> 口令-->
+                </div>
+            </div>
+
+            <div class="form-group mouth_join" style="display:none">
+                <label for="" class="control-label col-sm-2">口令</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;margin-top: 10px;">
+                    <input type="text" name="cj[mouth_command]" value="{$item['mouth_command']}" maxlength="8" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">参与抽奖是输入口令(不填写则无需输入口令)</div>
+            </div>
+
+            <div class="form-group price_join" style="display:none">
+                <label for="" class="control-label col-sm-2">付费参与价格</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;margin-top: 10px;">
+                    <input type="text" name="cj[price]" id="sponsorship_text" value="{$item['price']}" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">
+                </div>
+                <div class="form-controls col-sm-3 help-block">付费参与价格</div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2" >版本</label>
+                <div class="form-controls col-sm-2" style="margin-left: 15px;">
+                    <select name="cj[is_zq]" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                        <option value="0" {if $item['is_zq']==0} selected{/if}>普通版</option>
+                        <option value="1" {if $item['is_zq']==1} selected{/if}>高级版</option>
+                    </select>
+                </div>
+            </div>
+            <!--<div id="version" style="display: none">-->
+            <!--<div class="form-group">-->
+                <!--<label for="" class="control-label col-sm-2">是否拼团</label>-->
+                <!--<div class="form-controls col-sm-5" style="margin-left: 15px;margin-top: 10px;">-->
+                    <!--<input type="radio" name="cj[is_pintuan]" value="0" class="" {if $item['is_pintuan'] == 0} checked="checked" {/if}> 否-->
+                    <!--<input type="radio" name="cj[is_pintuan]" value="1" class="" {if $item['is_pintuan'] == 1} checked="checked" {/if} style="margin-left:30px;"> 是-->
+                <!--</div>-->
+            <!--</div>-->
+                <!--</div>-->
+            <!--<div id="is_pintuan" style="display: none">-->
+            <!--<div class="form-group">-->
+                <!--<label for="" class="control-label col-sm-2">拼团人数上限</label>-->
+                <!--<div class="form-controls col-sm-1" style="margin-left: 15px;">-->
+                    <!--&lt;!&ndash;<input type="text" name="cj[pintuan_maxnum]" class="form-control" value="{$item['pintuan_maxnum']}"  style="display:inline-block;width:100%">&ndash;&gt;-->
+                    <!--<select name="cj[pintuan_maxnum]" class="form-control ng-pristine ng-untouched ng-valid ng-empty">-->
+                        <!--<option value="2" {if $item['pintuan_maxnum']==2} selected{/if}>2</option>-->
+                        <!--<option value="4" {if $item['pintuan_maxnum']==4} selected{/if}>4</option>-->
+                        <!--<option value="6" {if $item['pintuan_maxnum']==6} selected{/if}>6</option>-->
+                        <!--<option value="8" {if $item['pintuan_maxnum']==8} selected{/if}>8</option>-->
+                    <!--</select>-->
+                <!--</div>-->
+            <!--</div>-->
+                <!--</div>-->
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">抽奖说明</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    <textarea name="cj[draw_message]" class="form-control" value="{$item['draw_message']}" placeholder='建议100字以内'>{$item['draw_message']}</textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="control-label col-sm-2">审核</label>
+                <div class="form-controls col-sm-5" style="margin-left: 15px;">
+                    {if $item['audit_status']==1}
+                        <span style="margin-left: 15px;margin-top: 8px;display: block">通过</span>
+                    {elseif $item['audit_status']==2}
+                        <span style="margin-left: 15px;margin-top: 8px;display: block">奖品自动发布中...</span>
+                    {elseif $item['audit_status']==-1}
+                        <select name="cj[audit_status]" class="form-control ng-pristine ng-untouched ng-valid ng-empty" id="kjfs">
+                            <option value="1" {if $item['audit_status']==1} selected{/if}>通过</option>
+                            <option value="-1" {if $item['audit_status']==-1} selected{/if}>拒绝</option>
+                        </select>
+                    {else}
+                        <select name="cj[audit_status]" class="form-control ng-pristine ng-untouched ng-valid ng-empty" id="kjfs">
+                            <option value="0" {if $item['audit_status']==0} selected{/if}>待审核</option>
+                            <option value="1" {if $item['audit_status']==1} selected{/if}>通过</option>
+                            <option value="-1" {if $item['audit_status']==-1} selected{/if}>拒绝</option>
+                        </select>
+                    {/if}
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="form-controls col-sm-3 help-block">通过心愿商品发布奖品时，需要等待想要的用户自动参与抽奖后，奖品才会在前端显示</div>
+            </div>
+
+        </div>
+    </div>
+    <div class="form-group">
+        <span class="col-sm-12">
+            <input name="token" type="hidden" value="{$_W['token']}" />
+            <span class="btn btn-primary col-lg-1" id="hidpost"  style="margin-left: 45%;">提交 </span>
+            <span class="btn btn-primary col-lg-1" id="post"  style="margin-left: 45%;">提交 </span>
+
+        </div>
+    </div>
+</form>
+<input type="hidden" value="0" id="Infos">
+
+<!-- 选择用户 -->
+<div class="modal fade" id="user-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog" style="width:800px;top:360px;">
+
+        <div class="modal-content">
+
+            <input type="hidden" name="m" value=""/>
+
+            <div class="modal-header">
+
+                <button type="button" class="close close_user" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+
+                    <h4>选择用户</h4>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row">
+
+                    <div class="input-group">
+
+                        <input type="text" class="form-control" name="keyword" value="" id="keyword_user" placeholder="请输入用户名称关键字">
+
+                        <span class="input-group-btn"><button type="button" class="btn btn-default" onclick="search_users();">搜索</button></span>
+
+                    </div>
+
+                </div>
+
+                <div id="module-menus" style="padding-top:5px;"><div style="max-height:500px;overflow:auto;min-width:750px;">
+
+                    <table class="table table-hover" style="min-width:750px;">
+
+                        <tbody id="user_list">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{/if}
+{template 'common/footer'}
+
+<script>
+
+    function refreshCode(ojb,id){
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            url: "{php echo $this->createWeburl('Invitation', array( 'op' => 'refresh'))}",
+            data: {id: id},
+            success:function(result){
+                if(result.success == 1 ){
+                    alert('更新二维码成功！');
+                    ojb.parentNode.removeChild(ojb);
+                }else{
+                    alert('更新二维码失败！');
+                }
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $(document).on('click','.stick',function(){
+            id = $(this).attr('id');
+            var del = $("#"+id);
+            var _html = '<a class="btn btn-default btn-sm stickcancel" id="'+id+'">取消置顶</a>';
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: "{php echo $this->createWeburl('Choujiang_goods', array( 'op' => 'stick'))}",
+                data: {id: id},
+                success:function(result){
+                    if(result.type == "success" ){
+                        alert('置顶成功！');
+                        $("#"+id).parent().prepend(_html);
+                        del.remove();
+                    }else{
+                        alert('置顶失败！');
+                    }
+                }
+            })
+        })
+
+        $(document).on('click','.stickcancel',function(){
+            id = $(this).attr('id');
+            var del  = $("#"+id);
+            var _html = '<a class="btn btn-default btn-sm stick" id="'+id+'">置顶</a>';
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: "{php echo $this->createWeburl('Choujiang_goods', array( 'op' => 'stick_cancel'))}",
+                data: {id: id},
+                success:function(result){
+                    if(result.type == "success" ){
+                        alert('取消置顶成功！');
+                        $("#"+id).parent().prepend(_html);
+                        del.remove();
+                    }else{
+                        alert('取消置顶失败！');
+                    }
+                }
+            })
+        })
+
+
+        var version=$("select[name='cj[is_zq]']").val();
+        var is_pintuan = $("[name='cj[is_pintuan]']:checked").val();
+        if(version==1){
+            $("#version").css('display','block')
+            if(is_pintuan==1){
+                $("#is_pintuan").css('display','block')
+            }
+        }
+
+        $('#hidpost').hide();
+    })
+    //版本切换
+    $("select[name='cj[is_zq]']").change(function () {
+        var version=$(this).val();
+        if(version==1){
+            $("#version").css('display','block')
+        }else{
+            $("#version").css('display','none')
+        }
+
+    })
+    //是否拼团
+    $(":radio[name='cj[is_pintuan]']").click(function () {
+        var is_pintuan = $("[name='cj[is_pintuan]']:checked").val();
+        if (is_pintuan == 1) {
+            $("#is_pintuan").css('display', 'block')
+        }else{
+            $("#is_pintuan").css('display', 'none')
+        }
+    })
+
+    $('#post').on('click',function () {
+        var spanobj= $('#post');
+        var spanobjP=$('#hidpost');
+        spanobj.hide();
+        spanobjP.show();
+        if($('#goods_name').val()==""){
+            alert('奖品名称不能为空！');
+            spanobj.show();
+            spanobjP.hide();
+            return false;
+        }
+        if($('#goods_num').val()<=0){
+            alert('数量必须大于0！');
+            spanobj.show();
+            spanobjP.hide();
+            return false;
+        }
+        var img=$("input[name='cj[goods_icon]']").parent().next().find('.img-responsive').attr('src');
+        if(img=='./resource/images/nopic.jpg'){
+            alert('请选择奖品缩略图！');
+            spanobj.show();
+            spanobjP.hide();
+            return false;
+        }
+        if($('#user_nickname').val()==''){
+            alert('发起人不能为空！');
+            spanobj.show();
+            spanobjP.hide();
+            return false;
+        }
+        $("#loading").css('display','block')
+        $.post($('form').attr('action'),$('form').serialize(),function (res) {
+            var response = eval("(" + res + ")");
+            $("#loading").css('display','none')
+            if(response.type=='success'){
+                alert(response.message);
+                location.href=response.redirect;
+            }else{
+                spanobj.show();
+                spanobjP.hide();
+                alert(response.message);
+            }
+        }).error(function(err) {
+            $("#loading").css('display','none');
+            spanobj.show();
+            spanobjP.hide();
+            if(err.responseText!=""){
+                alert(err.responseText);
+            }else{
+                alert("网络错误，请刷新后重试！");
+            }
+        });
+    })
+
+    function limitNum() {
+        var num=$("#goods_num").val();
+        var people=$("input[name='cj[smoke_num]']").val();
+        if(num>100000){
+            $("#goods_num").val(100000);
+        }
+        if(people>1024){
+            $("input[name='cj[smoke_num]']").val(1024)
+        }
+    }
+    $(document).ready(function () {
+        var img=$("input[name='img_url']").val();
+        $("input[name='cj[goods_icon]']").parent().next().find(".img-responsive").attr('src', img);
+    })
+
+    $(".btn_seluser").click(function(){
+
+        $('#user-info').modal('show');
+        $('#Infos').val(0);
+
+    });
+    $(".btn_seluser1").click(function(){
+        var user_nicknames = $("#user_nicknames").val();
+        var goods_num = $("#goods_num").val();
+        $('#Infos').val(1);
+        $('#user-info').modal('show');
+
+    });
+    $("#kjfs").change(function(){
+        var index = $(this).children('option:selected').val();
+        if(index == 0){
+            $("#kjsj").css("display","block");
+            $("#kjrs").css("display","none");
+        }else if(index == 1){
+            $("#kjsj").css("display","none");
+            $("#kjrs").css("display","block");
+        }else{
+            $("#kjsj").css("display","none");
+            $("#kjrs").css("display","none");
+        }
+    });
+
+$("#card").on("click",".cardbox button",function(){
+    $(this).parent().remove();
+});
+    $("#good_lb").change(function(){
+        var index = $(this).children('option:selected').val();
+        if(index == 0){
+            $("#shiwu").css("display","block");
+            $("#hongbao").css("display","none");
+            $("#dianzika").css("display","none");
+        }else if(index == 1){
+            $("#shiwu").css("display","none");
+            $("#hongbao").css("display","block");
+            $("#dianzika").css("display","none");
+        }else{
+           $("#shiwu").css("display","none");
+            $("#hongbao").css("display","none");
+            $("#dianzika").css("display","block");
+        }
+    });
+
+$("#addCard").click(function(){
+    $("#card").append(
+            '<div class="cardbox">'+
+                '<div class="form-group">'+
+                    '<label for="" class="control-label col-sm-2">卡号</label>'+
+                    '<div class="form-controls col-sm-5" style="margin-left: 15px;">'+
+                        '<input type="text" name="card_number[]" value="" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">'+
+                    '</div>'+
+                    '<div class="col-sm-1"></div>'+
+                    '<div class="form-controls col-sm-3 help-block">电子卡号</div>'+
+                '</div>'+
+                '<div class="form-group">'+
+                    '<label for="" class="control-label col-sm-2">密码</label>'+
+                    '<div class="form-controls col-sm-5" style="margin-left: 15px;">'+
+                        '<input type="text" name="card_password[]" value="" class="form-control ng-pristine ng-untouched ng-valid ng-empty"  placeholder="" autocomplete="off">'+
+                    '</div>'+
+                    '<div class="col-sm-1"></div>'+
+                    '<div class="form-controls col-sm-3 help-block">电子卡密码</div>'+
+                '</div>'+
+                '<button class="dels">删除</button>'+
+            '</div>'
+        )
+});
+
+function search_users(){
+
+    var keyword_user=$("#keyword_user").val();
+    var machine_canyu=$("#machine_canyu").val();
+
+    $("#user_list").empty();
+
+    $.ajax({
+        type: 'post',
+        dataType: 'json',
+        url: "{php echo $this->createWebUrl('choujiang_goods',array('op' =>'user'))}",
+        data: {keyword_user: keyword_user, machine_canyu: machine_canyu},
+
+        success:function(result){
+
+            if(result.data == ''){
+
+                var html = '未找到该用户...'
+                $("#user_list").append(html);
+
+            }else{
+                var html=getuserRows(result.data);
+
+                $("#user_list").append(html);
+            }
+
+        }
+    });
+}
+function  seluser(){
+
+    var user_nickname = $("#user_nickname").val();
+
+    if(user_nickname !=''){
+
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            url: "{php echo $this->createWebUrl('choujiang_goods',array('op' =>'user'))}",
+            data: {user_nickname: user_nickname},
+
+            success:function(result){
+
+                if(result.success == 1){
+
+                    $("#select_uid").val(result.data);
+
+                }else{
+
+                    alert(result.data);
+
+                }
+            }
+        });
+
+    }
+
+
+
+}
+
+function getuserRows(data){
+
+    var html='';
+
+    for(i=0;i<data.length;i++){
+
+        html+='<tr>';
+
+        html+='<td><img src="'+data[i].avatar+'" style="width:30px;height:30px;padding1px;border:1px solid #ccc"> '+data[i].nickname+'</td>';
+
+        html+='<td></td>';
+
+        html+='<td></td>';
+
+        html+='<td style="width:80px;"><a href="javascript:;" onclick="select_user(this)" link_name='+data[i].nickname+' user_uid='+data[i].openid+'>选择</a></td>';
+
+        html+='</tr>';
+
+    }
+
+    return html;
+
+}
+
+function select_user(obj){
+    var infos = $('#Infos').val();
+
+    if(infos == 0){
+
+       $("#user_nickname").val($(obj).attr('link_name'));
+
+       $("#select_uid").val($(obj).attr('user_uid'));
+    }else if(infos == 1){
+        var user_nicknames = $("#user_nicknames").val();
+
+        if(user_nicknames == ''){
+            var str_user = $(obj).attr('link_name');
+        }else{
+            var str_user = user_nicknames+'++'+$(obj).attr('link_name');
+        }
+
+        $("#user_nicknames").val(str_user);
+        // $("#select_uid1").val(str_uid);
+    }
+
+
+
+   $('#user-info').modal('hide');
+
+   $("#keyword_user").val('');
+
+   $("#user_list").html('');
+
+}
+</script>
+<!-- 是否指定中奖者 -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        var val = $(".onclick:checked").val();
+        var val1 = $(".onclick1:checked").val();
+        var val2 = $(".onclick2:checked").val();
+        if(val == 1){
+            $('.goods_winning').attr("style","");
+        }else{
+            $('.goods_winning').attr("style","display:none");
+        }
+        $('.onclick').click(function(){
+            var type = $(this).val();
+            if(type == 1){
+                $('.goods_winning').attr("style","");
+            }else{
+                $('.goods_winning').attr("style","display:none");
+            }
+        })
+        if(val1 == 1){
+            $('.price_join').attr("style","");
+        }else if(val1 == 2){
+            $('.mouth_join').attr("style","");
+        }else{
+            $('.price_join').attr("style","display:none");
+            $('.mouth_join').attr("style","display:none");
+        }
+        $('.onclick1').click(function(){
+            var type = $(this).val();
+            // alert(123);
+            if(type == 1){
+                $('.mouth_join').attr("style","display:none");
+                $('.price_join').attr("style","");
+            }else if(type == 2){
+                $('.price_join').attr("style","display:none");
+                $('.mouth_join').attr("style","");
+            }else{
+                $('.price_join').attr("style","display:none");
+                $('.mouth_join').attr("style","display:none");
+            }
+        })
+        if(val2 == 1){
+            $('.area').attr("style","");
+        }else{
+            $('.area').attr("style","display:none");
+        }
+        $('.onclick2').click(function(){
+            var type = $(this).val();
+            if(type == 1){
+                $('.area').attr("style","");
+            }else{
+                $('.area').attr("style","display:none");
+            }
+        })
+    })
+</script>
